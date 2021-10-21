@@ -1,21 +1,29 @@
-from abc import ABC
+from abc import ABC, abstractmethod
+from Connect4 import Connect4Impl, RED, YELLOW, NONE
 import BoardTest
 import struct
+import copy
 import io
+
 
 class Game(ABC):
    _initialized = False
-   def __init__(self, gamestr):
+   def __init__(self):
       if Game._initialized:
          raise Exception("Only one game at a time is supported")
       self._boardStateSynched = False
       Game._initialized = True
+
+
+class CGame(Game):
+   def __init__(self, gamestr):
+      super().__init__()
       BoardTest.init(gamestr)
 
-   def enterMove(move: str):
+   def enterMove(self, move: str):
       BoardTest.enterMove(move)
 
-   def applyMove():
+   def applyMove(self):
       BoardTest.applyMove()
 
    def getCurrMove(self):
@@ -48,7 +56,7 @@ class Game(ABC):
 
 
 
-class CheckersGame(Game):
+class CheckersGame(CGame):
    def __init__(self):
       super().__init__("CheckersBoard")
 
@@ -104,7 +112,7 @@ class CheckersGame(Game):
       
       return pieceStr
 
-class OthelloGame(Game):
+class OthelloGame(CGame):
    def __init__(self):
       super().__init__("OthelloBoard")
 
@@ -153,7 +161,7 @@ class OthelloGame(Game):
       else:
          raise ValueError("Unknown Othello board value (0x{:0X})".format(piece))
 
-class C4Pop10Game(Game):
+class C4Pop10Game(CGame):
    class C4Pop10GameScore:
       def __init__(self):
          self.safeDisks = 0
@@ -228,4 +236,64 @@ class C4Pop10Game(Game):
    def getYellowScore(self):
       self._verifyStateSync()
       return self._yellowScore
+
+
+class Connect4(Game):
+   def __init__(self):
+      super().__init__()
+      self.game = Connect4Impl()
+      self.game_states = [self.getBoardCopy()]
+      self.saved_column = None
+      self.history = []
+
+   def showBoard(self):
+      return self.game.printBoard()
+
+   def getBoardCopy(self):
+      return copy.deepcopy(self.game.board)
+
+   def getWhoseMove(self):
+      return self.game.getWhoseMove()
+
+   def getDimensions(self):
+      return (self.game.rows, self.game.cols)
+
+   def doMove(self, column):
+      try:
+         int_col = int(column)
+         success = self.game.insert(int_col)
+         if success:
+            self.game_states.append(self.getBoardCopy())
+            self.history.append(int_col)
+      except ValueError:
+         print('Please provide a valid column NUMBER')
+
+   def applyMove(self):
+      self.doMove(self.saved_column)
+
+   def enterMove(self, move):
+      self.saved_column = move
+
+   def getCurrMove(self):
+      return self.saved_column
+
+   def getValidMoves(self):
+      return self.game.getValidMoves()
+
+   def getPieceAtPos(self, row, col):
+      return self.game.board[row][col]
+
+   def saveBoardState(self):
+      print('METHOD NOT IMPLEMENTED')
+
+   def loadBoardState(self, boardState):
+      print('METHOD NOT IMPLEMENTED')
+
+   def undoMoves(self, movesToUndo):
+      # Can't go past first board state
+      goBackTo = max(1, 1 + len(self.history) - movesToUndo)
+      self.game_states = self.game_states[:goBackTo]
+      self.game.board = self.game_states[-1]
+      self.game.turn = RED if (goBackTo - 1) % 2 == 0 else YELLOW
+      self.history = self.history[:goBackTo - 1]
 
