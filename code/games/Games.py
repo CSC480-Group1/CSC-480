@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 import BoardTest
 import struct
 import io
@@ -51,8 +51,24 @@ class Game(ABC):
    def showBoard(self):
       return BoardTest.showBoard()
 
+   def _verifyStateSync(self):
+      if not self._boardStateSynched:
+         self._syncBoardState()
+   
+   def _syncBoardState(self):
+      if self._boardStateSynched:
+         return
+      self._boardStateSynched = True
+      self._parseBoardState(BoardTest.getBinaryBoard())
+      self._moves = BoardTest.getValidMoves()
+
+   @abstractmethod
+   def _parseBoardState(self, binData):
+      pass
+
    def getValidMoves(self):
-      return BoardTest.getValidMoves()
+      self._verifyStateSync()
+      return self._moves
    
    def getMoveHist(self):
       return BoardTest.getMoveHist()
@@ -63,8 +79,7 @@ class CheckersGame(Game):
    def __init__(self):
       super().__init__("CheckersBoard")
 
-   def _parseBoardState(self):
-      binData = BoardTest.getBinaryBoard()
+   def _parseBoardState(self, binData):
       with io.BytesIO(binData) as strm:
 
          dim = struct.unpack('B', strm.read(1))[0]
@@ -76,11 +91,6 @@ class CheckersGame(Game):
                rowArr.append(struct.unpack('B', strm.read(1))[0])
             self._board.append(rowArr)
          self._move = struct.unpack('B', strm.read(1))[0]
-
-   def _verifyStateSync(self):
-      if not self._boardStateSynched:
-         self._parseBoardState()
-         self._boardStateSynched = True
 
    def getWhoseMove(self):
       self._verifyStateSync()
@@ -124,8 +134,7 @@ class OthelloGame(Game):
    def __init__(self):
       super().__init__("OthelloBoard")
 
-   def _parseBoardState(self):
-      binData = BoardTest.getBinaryBoard()
+   def _parseBoardState(self, binData):
       with io.BytesIO(binData) as strm:
          dim = struct.unpack('B', strm.read(1))[0]
          self._dim = dim
@@ -136,11 +145,6 @@ class OthelloGame(Game):
                rowArr.append(struct.unpack('b', strm.read(1))[0])
             self._board.append(rowArr)
          self._move = struct.unpack('B', strm.read(1))[0]
-
-   def _verifyStateSync(self):
-      if not self._boardStateSynched:
-         self._parseBoardState()
-         self._boardStateSynched = True
 
    def getWhoseMove(self):
       self._verifyStateSync()
@@ -190,8 +194,7 @@ class C4Pop10Game(Game):
    def __init__(self):
       super().__init__("C4Pop10Board")
 
-   def _parseBoardState(self):
-      binData = BoardTest.getBinaryBoard()
+   def _parseBoardState(self, binData):
       byte = struct.iter_unpack('b', binData)
       byte = map(lambda b: b[0], byte)
       self._width = next(byte)
@@ -216,11 +219,6 @@ class C4Pop10Game(Game):
       self._yellowScore.safeDisks = next(byte)
       self._yellowScore.threatDisks = next(byte)
       self._yellowScore.keptDisks = next(byte)
-
-   def _verifyStateSync(self):
-      if not self._boardStateSynched:
-         self._parseBoardState()
-         self._boardStateSynched = True
 
    def getWhoseMove(self):
       self._verifyStateSync()
