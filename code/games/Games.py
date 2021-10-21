@@ -20,36 +20,63 @@ class CGame(Game):
       super().__init__()
       BoardTest.init(gamestr)
 
-   def enterMove(self, move: str):
+   def enterMove(move: str):
+      """ Load a move as the 'current' move, ready to be executed. """
       BoardTest.enterMove(move)
 
-   def applyMove(self):
+   def applyMove():
+      """ Execute the currently loaded move. """
       BoardTest.applyMove()
 
    def getCurrMove(self):
+      """ Get the currently loaded move"""
       return BoardTest.getCurrMove()
 
    def doMove(self, move: str):
+      """ Load and execute a move. Shorthand for enterMove() followed by
+      applyMove(). """
       self._boardStateSynched = False
       BoardTest.enterMove(move)
       BoardTest.applyMove()
 
    def saveBoardState(self):
+      """ Get the current board state as a binary blob. This can be later used
+      by loadBoardState() to restore the board state. """
       return BoardTest.saveBoardState()
    
    def loadBoardState(self, boardState: bytes):
+      """ Restore a board state saved by saveBoardState(). """
       self._boardStateSynched = False
       BoardTest.loadBoardState(boardState)
 
    def undoMoves(self, moveCount: int):
+      """ Undo moveCount moves. If moveCount is greater than the number of 
+      moves that have been executed, the board will be reset to its initial
+      state. """
       self._boardStateSynched = False
-      BoardTest.undMoves(moveCount)
+      BoardTest.undoMoves(moveCount)
 
    def showBoard(self):
       return BoardTest.showBoard()
 
+   def _verifyStateSync(self):
+      if not self._boardStateSynched:
+         self._syncBoardState()
+   
+   def _syncBoardState(self):
+      if self._boardStateSynched:
+         return
+      self._boardStateSynched = True
+      self._parseBoardState(BoardTest.getBinaryBoard())
+      self._moves = BoardTest.getValidMoves()
+
+   @abstractmethod
+   def _parseBoardState(self, binData):
+      pass
+
    def getValidMoves(self):
-      return BoardTest.getValidMoves()
+      self._verifyStateSync()
+      return self._moves
    
    def getMoveHist(self):
       return BoardTest.getMoveHist()
@@ -60,8 +87,7 @@ class CheckersGame(CGame):
    def __init__(self):
       super().__init__("CheckersBoard")
 
-   def _parseBoardState(self):
-      binData = BoardTest.getBinaryBoard()
+   def _parseBoardState(self, binData):
       with io.BytesIO(binData) as strm:
 
          dim = struct.unpack('B', strm.read(1))[0]
@@ -74,11 +100,6 @@ class CheckersGame(CGame):
             self._board.append(rowArr)
          self._move = struct.unpack('B', strm.read(1))[0]
 
-   def _verifyStateSync(self):
-      if not self._boardStateSynched:
-         self._parseBoardState()
-         self._boardStateSynched = True
-
    def getWhoseMove(self):
       self._verifyStateSync()
       if self._move == 0:
@@ -87,10 +108,15 @@ class CheckersGame(CGame):
          return "WHITE"
 
    def getDim(self):
+      """ Get the dimensions of the chess board. The board will have size
+      getDim() x getDim(). """
       self._verifyStateSync()
       return self._dim
    
    def getPieceAtPos(self, row, col):
+      """ Get the value of a piece at a certain board position. (0, 0) is in the
+      upper-left corner. A dot (.) indicates no piece. A letter ("w" or "b")
+      indicates the color of the piece. Capitalized letters are kinged. """
       self._verifyStateSync()
 
       assert row < self._dim and col < self._dim
@@ -116,8 +142,7 @@ class OthelloGame(CGame):
    def __init__(self):
       super().__init__("OthelloBoard")
 
-   def _parseBoardState(self):
-      binData = BoardTest.getBinaryBoard()
+   def _parseBoardState(self, binData):
       with io.BytesIO(binData) as strm:
          dim = struct.unpack('B', strm.read(1))[0]
          self._dim = dim
@@ -129,11 +154,6 @@ class OthelloGame(CGame):
             self._board.append(rowArr)
          self._move = struct.unpack('B', strm.read(1))[0]
 
-   def _verifyStateSync(self):
-      if not self._boardStateSynched:
-         self._parseBoardState()
-         self._boardStateSynched = True
-
    def getWhoseMove(self):
       self._verifyStateSync()
       if self._move == 0:
@@ -142,10 +162,15 @@ class OthelloGame(CGame):
          return "WHITE"
 
    def getDim(self):
+      """ Get the dimensions of the chess board. The board will have size
+      getDim() x getDim(). """
       self._verifyStateSync()
       return self._dim
    
    def getPieceAtPos(self, row, col):
+      """ Get the value of a piece at a certain board position. (0, 0) is in the
+      upper-left corner. A dot (.) indicates no piece. A letter ("W" or "B")
+      indicates the color of the piece. """
       self._verifyStateSync()
 
       assert row < self._dim and col < self._dim
@@ -163,6 +188,12 @@ class OthelloGame(CGame):
 
 class C4Pop10Game(CGame):
    class C4Pop10GameScore:
+      """An object representing a player's score in C4Pop10. The score contains
+      three values: safe disks, threat disks, and kept disks. A safe disc is one
+      that can be removed and kept on this or a later move, with no opportunity
+      for the opponent to interfere. A threat disk is a disc that the opponent
+      can remove and keep unless the player does something to interfere. A kept
+      disk is a disc the player has already removed and kept."""
       def __init__(self):
          self.safeDisks = 0
          self.threatDisks = 0
@@ -171,8 +202,7 @@ class C4Pop10Game(CGame):
    def __init__(self):
       super().__init__("C4Pop10Board")
 
-   def _parseBoardState(self):
-      binData = BoardTest.getBinaryBoard()
+   def _parseBoardState(self, binData):
       byte = struct.iter_unpack('b', binData)
       byte = map(lambda b: b[0], byte)
       self._width = next(byte)
@@ -198,11 +228,6 @@ class C4Pop10Game(CGame):
       self._yellowScore.threatDisks = next(byte)
       self._yellowScore.keptDisks = next(byte)
 
-   def _verifyStateSync(self):
-      if not self._boardStateSynched:
-         self._parseBoardState()
-         self._boardStateSynched = True
-
    def getWhoseMove(self):
       self._verifyStateSync()
       if self._move == 0:
@@ -211,10 +236,15 @@ class C4Pop10Game(CGame):
          return "RED"
    
    def getBoardDimensions(self):
+      """ Get the dimensions of the checkers board. The return value is a
+      tuple of (width, height)."""
       self._verifyStateSync()
       return (self._width, self._height)
    
    def getPieceAtPos(self, row, col):
+      """Get the value of a piece at a certain board position. (0, 0) is in the
+      upper-left corner. A dot (.) indicates no piece. A letter ("R" or "Y")
+      indicates the color of the piece. """
       self._verifyStateSync()
 
       assert row < self._height and col < self._width
@@ -230,6 +260,7 @@ class C4Pop10Game(CGame):
          return "."
 
    def getRedScore(self):
+      """Gets the score of the red player. Returns a C4Pop10GameScore object."""
       self._verifyStateSync()
       return self._redScore
 
