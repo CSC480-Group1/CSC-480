@@ -13,7 +13,12 @@ def set_depth_limit(limit: int) -> None:
     global depth_limit
     depth_limit = limit
 
+_tt = {}
+
 def minimax_val(game: Game, eval, alpha: float, beta: float, depthLimit: int) -> int:
+    key = game.getBoardKey()
+    if key in _tt:
+        return _tt[key]
     moves = game.getValidMoves()
     if depthLimit == 0 or len(moves) == 0:
         return eval(game)
@@ -27,9 +32,11 @@ def minimax_val(game: Game, eval, alpha: float, beta: float, depthLimit: int) ->
 
             max_value = max(max_value, successor_value)
             if successor_value >= beta:
+                _tt[key] = successor_value
                 return successor_value
             alpha = max(alpha, successor_value)
 
+        _tt[key] = max_value
         return max_value
     else:
         min_value = float('inf')
@@ -40,9 +47,11 @@ def minimax_val(game: Game, eval, alpha: float, beta: float, depthLimit: int) ->
 
             min_value = min(min_value, successor_value)
             if successor_value <= alpha:
+                _tt[key] = successor_value
                 return successor_value
             beta = min(beta, successor_value)
         
+        _tt[key] = min_value
         return min_value
 
 def minimax_best_move(game: Game, eval) -> str:
