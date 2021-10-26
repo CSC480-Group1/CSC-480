@@ -20,6 +20,8 @@ class _MCTS_Node:
         self.children = []
         self.unexplored_children = game.getValidMoves()
         self.is_terminal_state = len(self.unexplored_children) == 0
+        
+        self.player = game.getPlayer()
 
     def calculate_uct_value(self, parent):
         win_ratio = self.score / self.visits
@@ -37,7 +39,12 @@ class _MCTS_Node:
         
     def backpropagate(self, delta):
         self.visits += 1
-        self.score += delta
+        if self.player == 'max':
+            self.score += delta
+        elif self.player == 'min':
+            self.score -= delta
+        else:
+            raise Exception('Unexpected player value')
         if self.parent is not None:
             self.parent.backpropagate(delta)
 
@@ -50,12 +57,6 @@ def _evaluate_terminal_state(game: CGame, player: str) -> int:
         boardValue = -1
     else:
         boardValue = 0
-
-    if player == 'min':
-        # negative scores are good for 'min'
-        # Instead of dealing with maxes/mins everywhere in the algorithm, just negate
-        # the score if we want a minimum, and leave it if we want a maximum
-        boardValue = -1 * boardValue
     return boardValue
 
 def _simulate_rollout(game: CGame, player: str) -> int :
@@ -80,7 +81,7 @@ def mcts(game: CGame, player: str):
         return moves[0]
     root = _MCTS_Node(None, "", game)
 
-    iter = range(50)
+    iter = range(200)
     if has_tqdm:
         iter = tqdm(iter, desc='Calculating Monte-Carlo')
 
