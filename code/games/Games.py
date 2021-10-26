@@ -86,6 +86,10 @@ class CGame(Game):
    
    def getMoveHist(self):
       return BoardTest.getMoveHist()
+   
+   @abstractmethod
+   def getPlayer(self):
+      pass
 
 
 
@@ -143,6 +147,12 @@ class CheckersGame(CGame):
          pieceStr = pieceStr.upper()
       
       return pieceStr
+      
+   def getPlayer(self):
+      if self.getWhoseMove() == 'BLACK':
+         return 'max'
+      else:
+         return 'min'
 
 class OthelloGame(CGame):
    def __init__(self):
@@ -191,6 +201,12 @@ class OthelloGame(CGame):
          return 'B'
       else:
          raise ValueError("Unknown Othello board value (0x{:0X})".format(piece))
+
+   def getPlayer(self):
+      if self.getWhoseMove() == 'BLACK':
+         return 'max'
+      else:
+         return 'min'
 
 class C4Pop10Game(CGame):
    class C4Pop10GameScore:
@@ -273,6 +289,12 @@ class C4Pop10Game(CGame):
    def getYellowScore(self):
       self._verifyStateSync()
       return self._yellowScore
+   
+   def getPlayer(self):
+      if self.getWhoseMove() == 'YELLOW':
+         return 'max'
+      else:
+         return 'min'
 
 
 class Connect4(Game):
