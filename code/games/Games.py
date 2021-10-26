@@ -56,6 +56,12 @@ class CGame(Game):
       self._boardStateSynched = False
       BoardTest.undoMoves(moveCount)
 
+   def getBoardKey(self):
+      """ Get a compressed binary representation of the current board suitable
+      for use in a hash table. Indended for use with a transposition table in
+      minimax """
+      return BoardTest.getBoardKey()
+
    def showBoard(self):
       return BoardTest.showBoard()
 
