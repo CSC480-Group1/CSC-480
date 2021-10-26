@@ -41,10 +41,12 @@ print("  2) Othello")
 while True:
     response = input('> ')
     if response == '1':
+        set_depth_limit(6)
         game = CheckersGame()
         eval = eval_checkers_1
         break
     elif response == '2':
+        set_depth_limit(4)
         game = OthelloGame()
         eval = eval_othello_1
         break
@@ -80,4 +82,14 @@ while True:
         print(game.showBoard())
         doPlayerPlay(game, eval)
 
-print("Done!")
+print("\n\n")
+print(game.showBoard())
+
+final_score = eval(game)
+
+if final_score == 0:
+    print("Draw!")
+elif final_score > 0:
+    print("Black wins!")
+else:
+    print("White wins!")
