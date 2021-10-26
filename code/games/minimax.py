@@ -1,6 +1,11 @@
 from Games import Game
 import random
-from tqdm import tqdm
+
+has_tqdm = True
+try:
+    from tqdm import tqdm
+except ModuleNotFoundError:
+    has_tqdm = False
 
 depth_limit = 2
 
@@ -47,7 +52,12 @@ def minimax_best_move(game: Game, eval) -> str:
         raise ValueError('Game is already over')
     
     vals = {}
-    for move in tqdm(moves, desc="Calculating minimax"):
+
+    if has_tqdm:
+        moveitr = tqdm(moves, desc="Calculating minimax")
+    else:
+        moveitr = moves
+    for move in moveitr:
         game.doMove(move)
         val = minimax_val(game, eval, float('-inf'), float('inf'), depth_limit)
         game.undoMoves(1)
