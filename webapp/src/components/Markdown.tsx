@@ -30,7 +30,7 @@ import Article from "./Article";
 import Header from "./Header";
 import "./Markdown.scss";
 import Question, { TextOnlyQuestion, TextOnlyQuestionProps } from "./Question";
-// import TEST_README from "../markdown/heart_decision_tree_classifier_cleaned.md";
+// import TEST_README from "../markdown/minimax_algorithm_cleaned.md";
 
 function CodeComponent(props: any) {
   const [collapsed, setCollapsed] = useState(true);
