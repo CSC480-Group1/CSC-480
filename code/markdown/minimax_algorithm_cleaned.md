@@ -2,9 +2,7 @@
 
 ### Connect X Implementation
 
-First, let's define a basic Connect X implementation, which can have a variable number rows/columns and win condition.
-
-## Now to run out first test!
+For this, we will assume we have a basic working Connect X implementation, which can have a variable number rows/columns and win condition. If you want to see the implementation, check the `Show all code` checkbox at the top.
 
 ## Playing the game.
 
@@ -33,6 +31,8 @@ White:
 ```
 
 This should result in a win for black.
+
+## Now to run out first test!
 
 
 ```python
