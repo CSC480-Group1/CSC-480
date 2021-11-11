@@ -29,6 +29,6 @@ jobs:
         uses: actions-js/push@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          empty: true
+          empty: false
           message: Autogenerate markdown files
           branch: main
