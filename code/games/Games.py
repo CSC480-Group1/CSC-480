@@ -14,6 +14,52 @@ class Game(ABC):
       self._boardStateSynched = False
       Game._initialized = True
 
+   @abstractmethod
+   def doMove(self, move: str):
+      """ Load and execute a move. """
+      pass
+
+   @abstractmethod
+   def undoMoves(self, movecount: int):
+      """ Undo moveCount moves. If moveCount is greater than the number of 
+      moves that have been executed, the board will be reset to its initial
+      state. """
+      pass
+
+   @abstractmethod
+   def getBoardKey(self):
+      """ Get a compressed binary representation of the current board suitable
+      for use in a hash table. Indended for use with a transposition table in
+      minimax """
+      pass
+
+   @abstractmethod
+   def showBoard(self):
+      """ Get a formatted string representation of the current board, intended to be showed to a
+      human. The returned string will likely contain newlines. """
+      pass
+
+   @abstractmethod
+   def getValidMoves(self):
+      """ Get a list of all valid move strings from the current board configuration. """
+      pass
+
+   @abstractmethod
+   def getMoveHist(self):
+      """ Get a list of all previously applied moves. """
+      pass
+
+   @abstractmethod
+   def getPlayer(self):
+      """Get the name of the current player (either "min" or "max")."""
+      pass
+
+   @abstractmethod
+   def getWinner(self):
+      """If the game is at a terminal state, returns the name of the winning player (either
+      "min", "max", or "draw"). Otherwise, returns None."""
+      pass
+
 
 class CGame(Game):
    def __init__(self, gamestr):
@@ -50,16 +96,10 @@ class CGame(Game):
       BoardTest.loadBoardState(boardState)
 
    def undoMoves(self, moveCount: int):
-      """ Undo moveCount moves. If moveCount is greater than the number of 
-      moves that have been executed, the board will be reset to its initial
-      state. """
       self._boardStateSynched = False
       BoardTest.undoMoves(moveCount)
 
    def getBoardKey(self):
-      """ Get a compressed binary representation of the current board suitable
-      for use in a hash table. Indended for use with a transposition table in
-      minimax """
       return BoardTest.getBoardKey()
 
    def showBoard(self):
@@ -86,11 +126,6 @@ class CGame(Game):
    
    def getMoveHist(self):
       return BoardTest.getMoveHist()
-   
-   @abstractmethod
-   def getPlayer(self):
-      pass
-
 
 
 class CheckersGame(CGame):
@@ -154,6 +189,15 @@ class CheckersGame(CGame):
       else:
          return 'min'
 
+   def getWinner(self):
+      if len(self.getValidMoves()) != 0:
+         return None
+      
+      if self.getPlayer() == "max":
+         return "min"
+      else:
+         return "max"
+
 class OthelloGame(CGame):
    def __init__(self):
       super().__init__("OthelloBoard")
@@ -207,6 +251,25 @@ class OthelloGame(CGame):
          return 'max'
       else:
          return 'min'
+
+   def getWinner(self):
+      if len(self.getValidMoves()) != 0:
+         return None
+      
+      black_count = white_count = 0
+      for row in range(self.getDim()):
+         for col in range(self.getDim()):
+            piece = self.getPieceAtPos(row, col)
+            if piece == 'W':
+               white_count += 1
+            elif piece == 'B':
+               black_count += 1
+      if black_count > white_count:
+         return 'max'
+      elif white_count > black_count:
+         return 'min'
+      else:
+         return 'draw'
 
 class C4Pop10Game(CGame):
    class C4Pop10GameScore:
@@ -287,6 +350,7 @@ class C4Pop10Game(CGame):
       return self._redScore
 
    def getYellowScore(self):
+      """Gets the score of the yellow player. Returns a C4Pop10GameScore object."""
       self._verifyStateSync()
       return self._yellowScore
    
@@ -295,6 +359,20 @@ class C4Pop10Game(CGame):
          return 'max'
       else:
          return 'min'
+
+   def getWinner(self):
+      if len(self.getValidMoves()) != 0:
+         return None
+      
+      yellow_score = self.getYellowScore()
+      red_score = self.getRedScore()
+
+      if yellow_score.keptDisks == 10:
+         return 'max'
+      elif red_score.keptDisks == 10:
+         return 'min'
+      else:
+         raise ValueError("Somehow, someone won without keeping 10 disks (which is not possible)")
 
 
 class Connect4(Game):

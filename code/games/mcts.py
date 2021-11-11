@@ -1,4 +1,4 @@
-from Games import CGame
+from Games import Game
 from BoardTest import getBoardValue
 import math
 import random
@@ -12,7 +12,7 @@ except ModuleNotFoundError:
 uct_c = math.sqrt(2)
 
 class _MCTS_Node:
-    def __init__(self, parent, move: str, game: CGame):
+    def __init__(self, parent, move: str, game: Game):
         self.move = move
         self.parent = parent
         self.visits = 0
@@ -48,7 +48,7 @@ class _MCTS_Node:
         if self.parent is not None:
             self.parent.backpropagate(delta)
 
-def _evaluate_terminal_state(game: CGame, player: str) -> int:
+def _evaluate_terminal_state(game: Game, player: str) -> int:
     boardValue = getBoardValue()
 
     if boardValue > 0:
@@ -59,7 +59,7 @@ def _evaluate_terminal_state(game: CGame, player: str) -> int:
         boardValue = 0
     return boardValue
 
-def _simulate_rollout(game: CGame, player: str) -> int :
+def _simulate_rollout(game: Game, player: str) -> int :
     count = 0
     startkey = game.getBoardKey()
     while True:
@@ -74,7 +74,7 @@ def _simulate_rollout(game: CGame, player: str) -> int :
     assert game.getBoardKey() == startkey
     return delta
 
-def mcts(game: CGame, player: str):
+def mcts(game: Game, player: str):
     moves = game.getValidMoves()
     assert len(moves) > 0
     if len(moves) == 1:

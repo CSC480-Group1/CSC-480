@@ -2,7 +2,7 @@ from Games import *
 from BoardTest import getBoardValue
 from mcts import mcts
 
-def doPlayerPlay(game: CGame, eval) -> None:
+def doPlayerPlay(game: Game, eval) -> None:
     moves = game.getValidMoves()
     print("Possible moves:")
     for i, move in enumerate(moves):
@@ -25,7 +25,7 @@ def doPlayerPlay(game: CGame, eval) -> None:
     
     game.doMove(move)
 
-def doAIPlay(game: CGame) -> None:
+def doAIPlay(game: Game) -> None:
     if game.getWhoseMove() == 'BLACK':
         player = 'max'
     else:

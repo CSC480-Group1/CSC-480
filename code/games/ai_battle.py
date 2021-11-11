@@ -9,11 +9,11 @@ from BoardTest import getBoardValue
 
 class Player(ABC):
     @abstractmethod
-    def play(self, game: CGame):
+    def play(self, game: Game):
         pass
 
 class MonteCarloPlayer(Player):
-    def play(self, game: CGame):
+    def play(self, game: Game):
         move = mcts.mcts(game, game.getPlayer())
         print("Mcts plays {}".format(move))
         game.doMove(move)
@@ -23,13 +23,13 @@ class MinimaxPlayer(Player):
         self._eval_func = eval_func
         minimax.set_depth_limit(3)
 
-    def play(self, game: CGame):
+    def play(self, game: Game):
         move = minimax.minimax_best_move(game, self._eval_func)
         print("Minimax plays {}".format(move))
         game.doMove(move)
 
 class RandomPlayer(Player):
-    def play(self, game: CGame):
+    def play(self, game: Game):
         moves = game.getValidMoves()
         assert len(moves) > 0
         move = random.choice(moves)
