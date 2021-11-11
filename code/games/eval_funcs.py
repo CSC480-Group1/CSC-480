@@ -112,4 +112,25 @@ def eval_othello_1(game: OthelloGame) -> int:
             val += sign * _eval_othello_1_position_multiplier(row, col, dim)
 
     return val
+
+def eval_c4pop10_1(game: C4Pop10Game) -> int:
+    redScore = game.getRedScore()
+    yellowScore = game.getYellowScore()
+
+    score = 0
+
+    score += redScore.safeDisks * 100
+    score += redScore.threatDisks * 50
+    score += redScore.keptDisks * 120
+
+    score -= yellowScore.safeDisks * 100
+    score -= yellowScore.threatDisks * 50
+    score -= yellowScore.keptDisks * 120
+
+    if game.getWhoseMove() == "RED":
+        score += 50
+    else:
+        score -= 50
+    
+    return score
             

@@ -30,7 +30,7 @@ def doPlayerPlay(game: Game, eval) -> None:
 def doAIPlay(game: Game) -> None:
     player = game.getPlayer()
     startkey = game.getBoardKey()
-    move = mcts(game, player)
+    move = mcts(game, player, 300)
     assert game.getBoardKey() == startkey
     print("MCTS plays {}".format(move))
     game.doMove(move)
@@ -40,6 +40,7 @@ print("Game options:")
 print("  1) Checkers")
 print("  2) Othello")
 print("  3) Tic Tac Toe")
+print("  4) C4Pop10")
 
 while True:
     response = input('> ')
@@ -51,6 +52,9 @@ while True:
         break
     elif response == '3':
         game = TicTacToeGame()
+        break
+    elif response == '4':
+        game = C4Pop10Game()
         break
     print("Choices are '1' or '2'")
 

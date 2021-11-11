@@ -4,7 +4,6 @@ import minimax
 import eval_funcs
 import mcts
 from Games import *
-from BoardTest import getBoardValue
 
 
 class Player(ABC):
@@ -19,9 +18,9 @@ class MonteCarloPlayer(Player):
         game.doMove(move)
 
 class MinimaxPlayer(Player):
-    def __init__(self, eval_func):
+    def __init__(self, eval_func, depth_limit=6):
         self._eval_func = eval_func
-        minimax.set_depth_limit(6)
+        minimax.set_depth_limit(depth_limit)
 
     def play(self, game: Game):
         move = minimax.minimax_best_move(game, self._eval_func)
@@ -36,9 +35,9 @@ class RandomPlayer(Player):
         print("Random plays {}".format(move))
         game.doMove(move)
 
-game = CheckersGame()
+game = C4Pop10Game()
 maxPlayer = MonteCarloPlayer()
-minPlayer = MinimaxPlayer(eval_funcs.eval_checkers_1)
+minPlayer = MinimaxPlayer(eval_funcs.eval_c4pop10_1)
 # player2 = RandomPlayer()
 
 while True:
@@ -55,9 +54,9 @@ while True:
 val = game.getWinner()
 
 if val == "max":
-    print("Max wins!")
+    print("{} wins!".format(maxPlayer.__class__.__name__))
 elif val == "min":
-    print("Min wins!")
+    print("{} wins!".format(minPlayer.__class__.__name__))
 else:
     print("Draw!")
 
