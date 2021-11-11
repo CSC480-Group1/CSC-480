@@ -14,14 +14,14 @@ class Player(ABC):
 
 class MonteCarloPlayer(Player):
     def play(self, game: Game):
-        move = mcts.mcts(game, game.getPlayer())
+        move = mcts.mcts(game, game.getPlayer(), 300)
         print("Mcts plays {}".format(move))
         game.doMove(move)
 
 class MinimaxPlayer(Player):
     def __init__(self, eval_func):
         self._eval_func = eval_func
-        minimax.set_depth_limit(3)
+        minimax.set_depth_limit(6)
 
     def play(self, game: Game):
         move = minimax.minimax_best_move(game, self._eval_func)
@@ -36,28 +36,28 @@ class RandomPlayer(Player):
         print("Random plays {}".format(move))
         game.doMove(move)
 
-game = OthelloGame()
-player1 = MonteCarloPlayer()
-player2 = MinimaxPlayer(eval_funcs.eval_othello_1)
+game = CheckersGame()
+maxPlayer = MonteCarloPlayer()
+minPlayer = MinimaxPlayer(eval_funcs.eval_checkers_1)
 # player2 = RandomPlayer()
 
 while True:
     print(game.showBoard())
     if len(game.getValidMoves()) == 0:
         break
-    player1.play(game)
+    maxPlayer.play(game)
 
     print(game.showBoard())
     if len(game.getValidMoves()) == 0:
         break
-    player2.play(game)
+    minPlayer.play(game)
 
-val = getBoardValue()
+val = game.getWinner()
 
-if val > 0:
-    print("Black wins!")
-elif val < 0:
-    print("White wins!")
+if val == "max":
+    print("Max wins!")
+elif val == "min":
+    print("Min wins!")
 else:
     print("Draw!")
 

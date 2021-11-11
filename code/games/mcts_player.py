@@ -1,6 +1,8 @@
 from Games import *
 from BoardTest import getBoardValue
 from mcts import mcts
+from tictactoe import TicTacToeGame
+
 
 def doPlayerPlay(game: Game, eval) -> None:
     moves = game.getValidMoves()
@@ -26,10 +28,7 @@ def doPlayerPlay(game: Game, eval) -> None:
     game.doMove(move)
 
 def doAIPlay(game: Game) -> None:
-    if game.getWhoseMove() == 'BLACK':
-        player = 'max'
-    else:
-        player = 'min'
+    player = game.getPlayer()
     startkey = game.getBoardKey()
     move = mcts(game, player)
     assert game.getBoardKey() == startkey
@@ -40,6 +39,7 @@ def doAIPlay(game: Game) -> None:
 print("Game options:")
 print("  1) Checkers")
 print("  2) Othello")
+print("  3) Tic Tac Toe")
 
 while True:
     response = input('> ')
@@ -48,6 +48,9 @@ while True:
         break
     elif response == '2':
         game = OthelloGame()
+        break
+    elif response == '3':
+        game = TicTacToeGame()
         break
     print("Choices are '1' or '2'")
 
@@ -70,25 +73,19 @@ while True:
         print("Enter 'b' or 'w'")
 
 while True:
-    moves = game.getValidMoves()
-    if len(moves) == 0:
-        break
     print("\n\n")
     print(game.showBoard())
     doAIPlay(game)
+    if game.getWinner() is not None:
+        break
     if not no_player:
         print("\n\n")
         print(game.showBoard())
         doPlayerPlay(game, eval)
+        if game.getWinner() is not None:
+            break
 
 print("\n\n")
 print(game.showBoard())
 
-final_score = getBoardValue()
-
-if final_score == 0:
-    print("Draw!")
-elif final_score > 0:
-    print("Black wins!")
-else:
-    print("White wins!")
+print("{} wins!".format(game.getWinner()))
