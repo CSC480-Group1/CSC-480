@@ -1,4 +1,5 @@
 from Games import *
+import random
 
 def eval_checkers_1(game: CheckersGame) -> int:
     dim = game.getDim()
@@ -133,4 +134,22 @@ def eval_c4pop10_1(game: C4Pop10Game) -> int:
         score -= 50
     
     return score
-            
+
+_num_rollouts = 2
+def eval_random_rollout(game: Game) -> int:
+    score = 0
+    key = game.getBoardKey()
+    for _ in range(_num_rollouts):
+        winner = game.getWinner()
+        count = 0
+        while winner is None:
+            game.doMove(random.choice(game.getValidMoves()))
+            count += 1
+            winner = game.getWinner()
+        game.undoMoves(count)
+        if winner == 'max':
+            score += 1
+        elif winner == 'min':
+            score -= 1
+    assert key == game.getBoardKey()
+    return score
