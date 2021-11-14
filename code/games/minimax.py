@@ -54,7 +54,7 @@ def minimax_val(game: Game, eval, alpha: float, beta: float, depthLimit: int) ->
         _tt[key] = min_value
         return min_value
 
-def minimax_best_move(game: Game, eval) -> str:
+def minimax_best_move(game: Game, eval, quiet=False) -> str:
     global depth_limit
     moves = game.getValidMoves()
     if len(moves) == 0:
@@ -62,7 +62,7 @@ def minimax_best_move(game: Game, eval) -> str:
     
     vals = {}
 
-    if has_tqdm:
+    if not quiet and has_tqdm:
         moveitr = tqdm(moves, desc="Calculating minimax")
     else:
         moveitr = moves
