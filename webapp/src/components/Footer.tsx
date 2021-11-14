@@ -1,6 +1,5 @@
 import { AppBar, Typography } from "@material-ui/core";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
-import React from "react";
 import { Link } from "react-router-dom";
 import { tutorials } from "../data";
 
@@ -48,51 +47,41 @@ export default function Footer() {
     <AppBar position="static" component="footer" className={classes.root}>
       <div className={classes.grid}>
         <div className={classes.siteTag}>
-          <h2>Decision Trees</h2>
-          <p>CSC 466 | Dr. Anderson | Spring 2021 | Cal Poly</p>
+          <h2>Search Algorithms in Games</h2>
+          <p>CSC 480 | Dr. Canaan | Fall 2021 | Cal Poly</p>
           <Typography variant="subtitle2">
-            Ben Glossner | Ethan Zimbelman | Rupal Totale
+            Ben Glossner  |  Jordan Powers <br/> Mukhammadorif Sultanov  |  Nicholas Sheffler
           </Typography>
         </div>
         <div className={classes.linkTag}>
           <h3>Introduction</h3>
-          <Link to='/getting-started'>Getting Started</Link>
-          <Link to='/preliminary-skills'>Preliminary Skills</Link>
-          <Link to='/introduction'>Intro to Decision Trees</Link>
+          <Link to='/purpose'>Purpose</Link>
         </div>
         
         <div className={classes.linkTag}>
           <h3>Tutorials</h3>
-          {tutorials.map((tutorial) =>
-            <Link to={`/${tutorial.notebook}`}>{tutorial.content.title}</Link>
+          {tutorials.map((tutorial, idx) =>
+            <Link key={`footer-link-${idx}`} to={`/${tutorial.notebook}`}>{tutorial.content.title}</Link>
           )}
         </div>
         
         <div className={classes.linkTag}>
           <h3>Resources</h3>
           <a
-            href="https://github.com/CSC466-Team7/csc466_project"
+            href="https://github.com/CSC480-Group1/CSC-480"
             target="_blank"
             rel="noreferrer noopener"
           >
             GitHub
           </a>
           <a
-            href="https://github.com/CSC466-Team7/csc466_project/tree/main/code/notebooks"
+            href="https://github.com/CSC480-Group1/CSC-480/tree/main/code/notebooks"
             target="_blank"
             rel="noreferrer noopener"
           >
             Notebooks
           </a>
-          <a
-            href="https://github.com/CSC466-Team7/csc466_project/tree/main/datasets"
-            target="_blank"
-            rel="noreferrer noopener"
-          >
-            Datasets
-          </a>
         </div>
-      
       </div>
     </AppBar>
   );

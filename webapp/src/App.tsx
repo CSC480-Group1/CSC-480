@@ -1,4 +1,3 @@
-import React from "react";
 import { Switch, Route, HashRouter } from "react-router-dom";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import { Container } from "@material-ui/core/";
@@ -6,11 +5,13 @@ import Markdown from "./components/Markdown";
 import { tutorials } from "./data";
 
 import Home from "./pages/Home";
+import Purpose from "./pages/Purpose";
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { ConnectX } from "./connectx/ConnectX";
 
 const theme = createMuiTheme({
   palette: {
@@ -39,16 +40,17 @@ function App() {
         <Navbar />
         <Container>
           <Switch>
-
             <Route exact path="/" component={Home} />
-            {tutorials.map((tutorial) =>
-              <Route path={`/${tutorial.notebook}`}>
+            {tutorials.map((tutorial, idx) =>
+              <Route key={"route" + idx} path={`/${tutorial.notebook}`}>
                 <Markdown
                   {...tutorial.content}
                   fileName={tutorial.notebook}
                 />
               </Route>
             )}
+            <Route path="/purpose" component={Purpose} />
+            <Route path="/connectx-demo" component={ConnectX} />
           </Switch>
         </Container>
         <Footer />
