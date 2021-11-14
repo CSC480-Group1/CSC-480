@@ -30,7 +30,7 @@ const useStyles = makeStyles((theme: Theme) =>
       opacity: 0.25,
       zIndex: -100,
       height: "100%",
-      background: "url(https://www.decadeonrestoration.org/themes/unrestore/images/tree.jpg) no-repeat center center fixed",
+      background: "url(https://www.pngkit.com/png/detail/194-1940853_play-connect-4-with-iphone-ipad-using-imessage.png) no-repeat center center fixed",
       backgroundSize: "cover"
     },
     overlay: {

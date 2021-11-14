@@ -1,0 +1,49 @@
+main {
+    margin-top: 5%;
+}
+
+section {
+    margin-bottom: 0;
+}
+
+#board {
+    font-family: monospace;
+    font-size: 2.25rem;
+}
+
+#move {
+    margin-right: 1vw;
+}
+
+#game-metadata {
+    margin-top: 3vh;
+    font-size: 1.5rem;
+}
+
+#game-options {
+    display: grid;
+    columns: 1;
+    row-gap: 1vh;
+    width: 20vw;
+    position: absolute;
+    left: 5vw;
+    top: 15vh;
+}
+
+#game-settings {
+    display: grid;
+    columns: 1;
+    row-gap: 1vh;
+    width: 20vw;
+    position: absolute;
+    right: 5vw;
+    top: 15vh;
+}
+
+#game-options button {
+    display: block;
+}
+
+.page {
+    text-align: center;
+}
