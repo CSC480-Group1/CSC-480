@@ -37,6 +37,7 @@ def doMinimaxPlay(game: Game, eval) -> None:
 print("Game options:")
 print("  1) Checkers")
 print("  2) Othello")
+print("  3) C4Pop10")
 
 while True:
     response = input('> ')
@@ -49,6 +50,11 @@ while True:
         set_depth_limit(4)
         game = OthelloGame()
         eval = eval_othello_1
+        break
+    elif response == '3':
+        set_depth_limit(6)
+        game = C4Pop10Game()
+        eval = eval_c4pop10_1
         break
     print("Choices are '1' or '2'")
 

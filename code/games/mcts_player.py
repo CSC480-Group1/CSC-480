@@ -1,8 +1,10 @@
 from Games import *
 from BoardTest import getBoardValue
 from mcts import mcts
+from tictactoe import TicTacToeGame
 
-def doPlayerPlay(game: CGame, eval) -> None:
+
+def doPlayerPlay(game: Game, eval) -> None:
     moves = game.getValidMoves()
     print("Possible moves:")
     for i, move in enumerate(moves):
@@ -25,13 +27,10 @@ def doPlayerPlay(game: CGame, eval) -> None:
     
     game.doMove(move)
 
-def doAIPlay(game: CGame) -> None:
-    if game.getWhoseMove() == 'BLACK':
-        player = 'max'
-    else:
-        player = 'min'
+def doAIPlay(game: Game) -> None:
+    player = game.getPlayer()
     startkey = game.getBoardKey()
-    move = mcts(game, player)
+    move = mcts(game, player, 300)
     assert game.getBoardKey() == startkey
     print("MCTS plays {}".format(move))
     game.doMove(move)
@@ -40,6 +39,8 @@ def doAIPlay(game: CGame) -> None:
 print("Game options:")
 print("  1) Checkers")
 print("  2) Othello")
+print("  3) Tic Tac Toe")
+print("  4) C4Pop10")
 
 while True:
     response = input('> ')
@@ -48,6 +49,12 @@ while True:
         break
     elif response == '2':
         game = OthelloGame()
+        break
+    elif response == '3':
+        game = TicTacToeGame()
+        break
+    elif response == '4':
+        game = C4Pop10Game()
         break
     print("Choices are '1' or '2'")
 
@@ -70,25 +77,19 @@ while True:
         print("Enter 'b' or 'w'")
 
 while True:
-    moves = game.getValidMoves()
-    if len(moves) == 0:
-        break
     print("\n\n")
     print(game.showBoard())
     doAIPlay(game)
+    if game.getWinner() is not None:
+        break
     if not no_player:
         print("\n\n")
         print(game.showBoard())
         doPlayerPlay(game, eval)
+        if game.getWinner() is not None:
+            break
 
 print("\n\n")
 print(game.showBoard())
 
-final_score = getBoardValue()
-
-if final_score == 0:
-    print("Draw!")
-elif final_score > 0:
-    print("Black wins!")
-else:
-    print("White wins!")
+print("{} wins!".format(game.getWinner()))

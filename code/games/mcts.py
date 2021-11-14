@@ -1,7 +1,6 @@
-from Games import CGame
-from BoardTest import getBoardValue
 import math
 import random
+from Games import Game
 
 has_tqdm = True
 try:
@@ -9,104 +8,137 @@ try:
 except ModuleNotFoundError:
     has_tqdm = False
 
-uct_c = math.sqrt(2)
+def _next_player(player):
+    if player == 'max':
+        return 'min'
+    elif player == 'min':
+        return 'max'
+    else:
+        raise ValueError('Unknown player "{}"'.format(player))
+
+class _Game_Lookahead:
+    def __init__(self, game: Game, depth = 0):
+        self.game = game
+        self.depth = depth
+
+    def doMove(self, move: str):
+        self.depth += 1
+        self.game.doMove(move)
+    
+    def undoMoves(self, moveCount: int):
+        self.depth = max(0, self.depth - moveCount)
+        self.game.undoMoves(moveCount)
 
 class _MCTS_Node:
-    def __init__(self, parent, move: str, game: CGame):
+    def __init__(self, move, depth, parent, player):
+        self.min_wins = 0
+        self.max_wins = 0
+        self.count = 0
         self.move = move
         self.parent = parent
-        self.visits = 0
-        self.score = 0
-        self.children = []
-        self.unexplored_children = game.getValidMoves()
-        self.is_terminal_state = len(self.unexplored_children) == 0
-        
-        self.player = game.getPlayer()
-
-    def calculate_uct_value(self, parent):
-        win_ratio = self.score / self.visits
-        return win_ratio + uct_c * math.sqrt(math.log(parent.visits) / self.visits)
+        self.children = {}
+        self.player = player
+        self.depth = depth
     
-    def choose_uct_best(self):
-        assert len(self.unexplored_children) == 0
-        assert len(self.children) != 0
-        return max(self.children, key=lambda node: node.calculate_uct_value(self))
-    
-    def choose_random_unexplored_child(self):
-        move = random.choice(self.unexplored_children)
-        self.unexplored_children.remove(move)
-        return move
-        
-    def backpropagate(self, delta):
-        self.visits += 1
-        if self.player == 'max':
-            self.score += delta
-        elif self.player == 'min':
-            self.score -= delta
+    def add_child(self, move):
+        if move in self.children:
+            raise ValueError('Child already exists')
         else:
-            raise Exception('Unexpected player value')
-        if self.parent is not None:
-            self.parent.backpropagate(delta)
-
-def _evaluate_terminal_state(game: CGame, player: str) -> int:
-    boardValue = getBoardValue()
-
-    if boardValue > 0:
-        boardValue = 1
-    elif boardValue < 0:
-        boardValue = -1
-    else:
-        boardValue = 0
-    return boardValue
-
-def _simulate_rollout(game: CGame, player: str) -> int :
-    count = 0
-    startkey = game.getBoardKey()
-    while True:
-        moves = game.getValidMoves()
-        if len(moves) == 0:
-            break
-        count += 1
-        game.doMove(random.choice(moves))
+            self.children[move] = _MCTS_Node(move, self.depth + 1, self, _next_player(self.player))
+            return self.children[move]
     
-    delta = _evaluate_terminal_state(game, player)
-    game.undoMoves(count)
-    assert game.getBoardKey() == startkey
-    return delta
+    def _get_p_win(self, player):
+        if self.count == 0:
+            raise ValueError("Must be updated at least once to get win probability")
+        if player == 'min':
+            return self.min_wins / self.count
+        elif player == 'max':
+            return self.max_wins / self.count
+        else:
+            raise ValueError('Unknown player "{}"'.format(player))
+    
+    def _get_expected_value(self):
+        if self.count == 0:
+            raise ValueError("Must be updated at least once to get expected value")
+        return (self.max_wins - self.min_wins) / self.count
 
-def mcts(game: CGame, player: str):
-    moves = game.getValidMoves()
-    assert len(moves) > 0
-    if len(moves) == 1:
-        return moves[0]
-    root = _MCTS_Node(None, "", game)
+    def _get_explore_term(self, parent, c=1):
+        if parent is not None:
+            return c * math.sqrt(2 * math.log(parent.count) / self.count)
+        else:
+            return 0
 
-    iter = range(200)
+    def get_ucb(self, c=1):
+        if self.count == 0:
+            raise ValueError("Must be updated at least once to calculate UCB")
+        p_win = self._get_expected_value()
+        if self.player == "max":
+            p_win *= -1
+        explore_term = self._get_explore_term(self.parent, c)
+        return p_win + explore_term
+    
+def _expand(game: _Game_Lookahead, node):
+    # Make sure the game state is at the current node
+    assert game.depth == node.depth
+    for move in game.game.getValidMoves():
+        child = None
+        try:
+            child = node.add_child(move)
+        except ValueError:
+            continue
+        return child
+    
+    return None
+
+
+def _best_child(node, c=1):
+    return max(node.children.values(), key=lambda child: child.get_ucb(c))
+
+
+def _tree_policy(game: _Game_Lookahead, node):
+    assert game.depth == node.depth
+
+    if game.game.getWinner() is not None:
+        return node
+    
+    unexplored_child = _expand(game, node)
+    if unexplored_child is not None:
+        game.doMove(unexplored_child.move)
+        return unexplored_child
+    else:
+        next = _best_child(node)
+        game.doMove(next.move)
+        return _tree_policy(game, next)
+
+def _backup(node, winner):
+    if node is None:
+        return
+    node.count += 1
+    if winner == 'min':
+        node.min_wins += 1
+    elif winner == 'max':
+        node.max_wins += 1
+    _backup(node.parent, winner)
+
+def _default_policy(game: _Game_Lookahead):
+    winner = game.game.getWinner()
+    while winner is None:
+        game.doMove(random.choice(game.game.getValidMoves()))
+        winner = game.game.getWinner()
+    return winner
+
+def mcts(game: Game, player: str, iterations: int):
+    key = game.getBoardKey()
+    start_node = _MCTS_Node(None, 0, None, player)
+    lookahead = _Game_Lookahead(game)
+    iter = range(iterations)
     if has_tqdm:
         iter = tqdm(iter, desc='Calculating Monte-Carlo')
-
-    startkey = game.getBoardKey()
-    
     for _ in iter:
-        curr = root
-        depth = 0
-        while len(curr.unexplored_children) == 0 and not curr.is_terminal_state:
-            next = curr.choose_uct_best()
-            game.doMove(next.move)
-            depth += 1
-            curr = next
-        if curr.is_terminal_state:
-            delta = _evaluate_terminal_state(game, player)
-        else:
-            move = curr.choose_random_unexplored_child()
-            game.doMove(move)
-            depth += 1
-            delta = _simulate_rollout(game, player)
-            curr = _MCTS_Node(curr, move, game)
-            curr.parent.children.append(curr)
-        curr.backpropagate(delta)
-        game.undoMoves(depth)
-        assert game.getBoardKey() == startkey
-    
-    best = root.choose_uct_best()
-    return best.move
+        node = _tree_policy(lookahead, start_node)
+        value = _default_policy(lookahead)
+        lookahead.undoMoves(lookahead.depth)
+        _backup(node, value)
+        assert key == game.getBoardKey()
+    action = _best_child(start_node, 0).move
+    return action
