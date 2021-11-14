@@ -1,26 +1,26 @@
 {
   "files": {
-    "main.css": "/CSC-480/static/css/main.a0e6d22f.chunk.css",
-    "main.js": "/CSC-480/static/js/main.50a07b1a.chunk.js",
-    "main.js.map": "/CSC-480/static/js/main.50a07b1a.chunk.js.map",
-    "runtime-main.js": "/CSC-480/static/js/runtime-main.22e42b7a.js",
-    "runtime-main.js.map": "/CSC-480/static/js/runtime-main.22e42b7a.js.map",
+    "main.css": "/CSC-480/static/css/main.3e1fbc07.chunk.css",
+    "main.js": "/CSC-480/static/js/main.101c4468.chunk.js",
+    "main.js.map": "/CSC-480/static/js/main.101c4468.chunk.js.map",
+    "runtime-main.js": "/CSC-480/static/js/runtime-main.5b2c74ee.js",
+    "runtime-main.js.map": "/CSC-480/static/js/runtime-main.5b2c74ee.js.map",
     "static/css/2.6ecb1c92.chunk.css": "/CSC-480/static/css/2.6ecb1c92.chunk.css",
-    "static/js/2.64d1e8c8.chunk.js": "/CSC-480/static/js/2.64d1e8c8.chunk.js",
-    "static/js/2.64d1e8c8.chunk.js.map": "/CSC-480/static/js/2.64d1e8c8.chunk.js.map",
-    "static/js/3.71a2ab3c.chunk.js": "/CSC-480/static/js/3.71a2ab3c.chunk.js",
-    "static/js/3.71a2ab3c.chunk.js.map": "/CSC-480/static/js/3.71a2ab3c.chunk.js.map",
+    "static/js/2.88f59bcd.chunk.js": "/CSC-480/static/js/2.88f59bcd.chunk.js",
+    "static/js/2.88f59bcd.chunk.js.map": "/CSC-480/static/js/2.88f59bcd.chunk.js.map",
+    "static/js/3.dcdaa975.chunk.js": "/CSC-480/static/js/3.dcdaa975.chunk.js",
+    "static/js/3.dcdaa975.chunk.js.map": "/CSC-480/static/js/3.dcdaa975.chunk.js.map",
     "index.html": "/CSC-480/index.html",
     "static/css/2.6ecb1c92.chunk.css.map": "/CSC-480/static/css/2.6ecb1c92.chunk.css.map",
-    "static/css/main.a0e6d22f.chunk.css.map": "/CSC-480/static/css/main.a0e6d22f.chunk.css.map",
-    "static/js/2.64d1e8c8.chunk.js.LICENSE.txt": "/CSC-480/static/js/2.64d1e8c8.chunk.js.LICENSE.txt",
+    "static/css/main.3e1fbc07.chunk.css.map": "/CSC-480/static/css/main.3e1fbc07.chunk.css.map",
+    "static/js/2.88f59bcd.chunk.js.LICENSE.txt": "/CSC-480/static/js/2.88f59bcd.chunk.js.LICENSE.txt",
     "static/media/katex.min.css": "/CSC-480/static/media/KaTeX_Typewriter-Regular.b6a56b14.woff"
   },
   "entrypoints": [
-    "static/js/runtime-main.22e42b7a.js",
+    "static/js/runtime-main.5b2c74ee.js",
     "static/css/2.6ecb1c92.chunk.css",
-    "static/js/2.64d1e8c8.chunk.js",
-    "static/css/main.a0e6d22f.chunk.css",
-    "static/js/main.50a07b1a.chunk.js"
+    "static/js/2.88f59bcd.chunk.js",
+    "static/css/main.3e1fbc07.chunk.css",
+    "static/js/main.101c4468.chunk.js"
   ]
 }
