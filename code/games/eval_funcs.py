@@ -135,6 +135,23 @@ def eval_c4pop10_1(game: C4Pop10Game) -> int:
     
     return score
 
+try:
+    from tictactoe import TicTacToeGame
+    def eval_tic_tac_toe_1(game: TicTacToeGame) -> int:
+        winner = game.getWinner()
+        if winner is None:
+            print(game.showBoard())
+        assert winner is not None
+        if winner == "max":
+            return 1
+        elif winner == "min":
+            return -1
+        else:
+            return 0
+except ModuleNotFoundError:
+    TicTacToeGame = None
+    eval_tic_tac_toe_1 = None
+
 _num_rollouts = 2
 def eval_random_rollout(game: Game) -> int:
     score = 0

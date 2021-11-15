@@ -11,6 +11,12 @@ from pathlib import Path
 import csv
 
 import sys
+
+try:
+    from tictactoe import TicTacToeGame
+except ModuleNotFoundError:
+    TicTacToeGame = None
+
 has_tqdm = True
 try:
     import tqdm
@@ -101,9 +107,17 @@ games = {
     "c4pop10": (C4Pop10Game, eval_funcs.eval_c4pop10_1, 6)
 }
 
+if TicTacToeGame is not None:
+    games["tic tac toe"] = (TicTacToeGame, eval_funcs.eval_tic_tac_toe_1, 9)
+
 if len(sys.argv) < 2:
     print("No game specified")
     exit(1)
+
+if TicTacToeGame is None and sys.argv[1] == "tic tac toe":
+    print("Tic tac toe requires numpy")
+    exit(1)
+
 if sys.argv[1] not in games:
     print("Unknown game {}".format(sys.argv[1]))
     exit(1)

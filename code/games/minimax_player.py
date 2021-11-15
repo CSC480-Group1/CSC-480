@@ -40,6 +40,8 @@ print("Game options:")
 print("  1) Checkers")
 print("  2) Othello")
 print("  3) C4Pop10")
+if TicTacToeGame is not None:
+    print("  4) Tic Tac Toe")
 
 while True:
     response = input('> ')
@@ -58,7 +60,15 @@ while True:
         game = C4Pop10Game()
         eval = eval_c4pop10_1
         break
-    print("Choices are '1' or '2'")
+    elif TicTacToeGame is not None and response == '4':
+        set_depth_limit(9)
+        game = TicTacToeGame()
+        eval = eval_tic_tac_toe_1
+        break
+    if TicTacToeGame is None:
+        print("Choices are '1', '2', '3'")
+    else:
+        print("Choices are '1', '2', '3', '4'")
 
 no_player = False
 
@@ -98,6 +108,6 @@ final_score = eval(game)
 if final_score == 0:
     print("Draw!")
 elif final_score > 0:
-    print("Black wins!")
+    print("Max wins!")
 else:
-    print("White wins!")
+    print("Min wins!")
