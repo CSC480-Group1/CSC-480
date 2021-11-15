@@ -10,6 +10,7 @@ import datetime
 from pathlib import Path
 import csv
 
+import sys
 has_tqdm = True
 try:
     import tqdm
@@ -94,19 +95,37 @@ def play_game(game, maxPlayer, minPlayer):
         'move_count': moveCount
     }
 
+games = {
+    "checkers": (CheckersGame, eval_funcs.eval_checkers_1, 4),
+    "othello": (OthelloGame, eval_funcs.eval_othello_1, 4),
+    "c4pop10": (C4Pop10Game, eval_funcs.eval_c4pop10_1, 6)
+}
+
+if len(sys.argv) < 2:
+    print("No game specified")
+    exit(1)
+if sys.argv[1] not in games:
+    print("Unknown game {}".format(sys.argv[1]))
+    exit(1)
+
+gameOpts = games[sys.argv[1]]
+
 pairs = [
-    (MinimaxPlayer(eval_funcs.eval_checkers_1), RandomPlayer()),
-    (MinimaxPlayer(eval_funcs.eval_random_rollout), RandomPlayer()),
-    (MinimaxPlayer(eval_funcs.eval_checkers_1), MinimaxPlayer(eval_funcs.eval_random_rollout))
+    (MinimaxPlayer(gameOpts[1], gameOpts[2]), RandomPlayer()),
+    (MinimaxPlayer(eval_funcs.eval_random_rollout, gameOpts[2]), RandomPlayer()),
+    (MinimaxPlayer(gameOpts[1], gameOpts[2]), MinimaxPlayer(eval_funcs.eval_random_rollout, gameOpts[2]))
 ]
 play_count = 5
 
-game = CheckersGame()
+game = gameOpts[0]()
 
-dataFile = Path('./data-{}.csv'.format(datetime.datetime.now().strftime('%m_%d-%H_%M')))
+dataFile = Path('./data-{}-{}.csv'.format(sys.argv[1], datetime.datetime.now().strftime('%m_%d-%H_%M')))
+
+print("Playing", game.__class__.__name__)
 
 if has_tqdm:
     pbar = tqdm.tqdm(total=(len(pairs) * 2 * play_count), desc='Simulating games')
+
 
 with dataFile.open('w') as df:
     writer = csv.DictWriter(df, fieldnames=['game', 'max', 'min', 'winner', 'max_tottime', 'min_tottime', 'move_count'])
