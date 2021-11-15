@@ -1151,6 +1151,4 @@
     Black's move
     
     Possible moves:
-  
-  _White has one at this point_
 
