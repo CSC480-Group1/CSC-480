@@ -1,6 +1,17 @@
 import ctypes
+import platform
 
-_boardtest = ctypes.CDLL("./boardtest.so")
+_boardtest = None
+if platform.system() == "Windows":
+   if platform.machine() == "AMD64":
+      _boardtest = ctypes.CDLL(".\\bins\\boardtest-x64.dll")
+   elif platform.machine() == "x86":
+      _boardtest = ctypes.CDLL(".\\bins\\boardtest.dll")
+elif platform.system() == "Linux":
+   _boardtest = ctypes.CDLL("./bins/boardtest.so")
+
+if _boardtest is None:
+   raise Exception("Unsupported platform")
 
 class _RawData(ctypes.Structure):
    _fields_ = [
