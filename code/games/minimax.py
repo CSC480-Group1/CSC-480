@@ -21,7 +21,7 @@ def minimax_val(game: Game, eval, alpha: float, beta: float, depthLimit: int, tt
     if depthLimit == 0 or len(moves) == 0:
         return eval(game)
     
-    if game.getWhoseMove() == 'BLACK':
+    if game.getPlayer() == 'max':
         max_value = float('-inf')
         for move in moves:
             game.doMove(move)
@@ -72,7 +72,7 @@ def minimax_best_move(game: Game, eval, quiet=False, tt={}) -> str:
 
     # print(vals)
     
-    if game.getWhoseMove() == 'BLACK':
+    if game.getPlayer() == 'max':
         best = max(vals.values())
     else:
         best = min(vals.values())
