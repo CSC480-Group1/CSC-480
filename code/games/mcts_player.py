@@ -1,7 +1,10 @@
 from Games import *
 from BoardTest import getBoardValue
 from mcts import mcts
-from tictactoe import TicTacToeGame
+try:
+    from tictactoe import TicTacToeGame
+except ModuleNotFoundError:
+    TicTacToeGame = None
 
 
 def doPlayerPlay(game: Game, eval) -> None:
@@ -39,8 +42,9 @@ def doAIPlay(game: Game) -> None:
 print("Game options:")
 print("  1) Checkers")
 print("  2) Othello")
-print("  3) Tic Tac Toe")
-print("  4) C4Pop10")
+print("  3) C4Pop10")
+if TicTacToeGame is not None:
+    print("  4) Tic Tac Toe")
 
 while True:
     response = input('> ')
@@ -51,12 +55,15 @@ while True:
         game = OthelloGame()
         break
     elif response == '3':
-        game = TicTacToeGame()
-        break
-    elif response == '4':
         game = C4Pop10Game()
         break
-    print("Choices are '1' or '2'")
+    elif TicTacToeGame is not None and response == '4':
+        game = TicTacToeGame()
+        break
+    if TicTacToeGame is None:
+        print("Choices are '1', '2', '3'")
+    else:
+        print("Choices are '1', '2', '3', '4'")
 
 no_player = False
 
