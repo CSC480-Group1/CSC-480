@@ -61,11 +61,15 @@ class RandomPlayer(Player):
     def __str__(self):
         return self.__class__.__name__
 
+move_limit = 300
 def play_game(game, maxPlayer, minPlayer):
     moveCount = 0
     max_tottime = min_tottime = 0
     while True:
         moveCount += 1
+        if moveCount == move_limit:
+            print("Hit move limit")
+            break
         if game.getWinner() is not None:
             break
         timer = time.perf_counter()
@@ -109,13 +113,14 @@ with dataFile.open('w') as df:
     writer.writeheader()
     try:
         for pair in pairs:
+            print(str(pair[0]), "vs.", str(pair[1]))
             for _ in range(play_count):
                 result = play_game(game, pair[0], pair[1])
                 writer.writerow(result)
                 if has_tqdm:
                     pbar.update()
             for _ in range(play_count):
-                result = play_game(game, pair[0], pair[1])
+                result = play_game(game, pair[1], pair[0])
                 writer.writerow(result)
                 if has_tqdm:
                     pbar.update()
