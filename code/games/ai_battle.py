@@ -29,6 +29,9 @@ class Player(ABC):
     def play(self, game: Game):
         pass
 
+    def reset(self):
+        pass
+
 class MonteCarloPlayer(Player):
     def __init__(self, num_iter = 300):
         self._num_iter = num_iter
@@ -53,6 +56,9 @@ class MinimaxPlayer(Player):
         move = minimax.minimax_best_move(game, self._eval_func, quiet=True, tt=self._tt)
         #print("Minimax plays {}".format(move))
         game.doMove(move)
+
+    def reset(self):
+        self._tt = {}
     
     def __str__(self):
         return "{}(eval_func={},depth_limit={})".format(self.__class__.__name__, self._eval_func.__name__, self._depth_limit)
@@ -72,6 +78,8 @@ move_limit = 300
 def play_game(game, maxPlayer, minPlayer):
     moveCount = 0
     max_tottime = min_tottime = 0
+    maxPlayer.reset()
+    minPlayer.reset()
     while True:
         moveCount += 1
         if moveCount == move_limit:
@@ -101,14 +109,20 @@ def play_game(game, maxPlayer, minPlayer):
         'move_count': moveCount
     }
 
+class GameOpts:
+    def __init__(self, gameClass, minimaxPlayer, mctsPlayer):
+        self.gameClass = gameClass
+        self.minimaxPlayer = minimaxPlayer
+        self.mctsPlayer = mctsPlayer
+
 games = {
-    "checkers": (CheckersGame, eval_funcs.eval_checkers_1, 4),
-    "othello": (OthelloGame, eval_funcs.eval_othello_1, 4),
-    "c4pop10": (C4Pop10Game, eval_funcs.eval_c4pop10_1, 6)
+    "checkers": GameOpts(CheckersGame, MinimaxPlayer(eval_funcs.eval_checkers_1, 6), MonteCarloPlayer(num_iter=500)),
+    "othello": GameOpts(OthelloGame, MinimaxPlayer(eval_funcs.eval_othello_1, 4), MonteCarloPlayer()),
+    "c4pop10": GameOpts(C4Pop10Game, MinimaxPlayer(eval_funcs.eval_c4pop10_1, 6), MonteCarloPlayer())
 }
 
 if TicTacToeGame is not None:
-    games["tic tac toe"] = (TicTacToeGame, eval_funcs.eval_tic_tac_toe_1, 9)
+    games["tic tac toe"] = GameOpts(TicTacToeGame, MinimaxPlayer(eval_funcs.eval_tic_tac_toe_1, 9), MonteCarloPlayer())
 
 if len(sys.argv) < 2:
     print("No game specified")
@@ -125,13 +139,13 @@ if sys.argv[1] not in games:
 gameOpts = games[sys.argv[1]]
 
 pairs = [
-    (MinimaxPlayer(gameOpts[1], gameOpts[2]), RandomPlayer()),
-    (MinimaxPlayer(eval_funcs.eval_random_rollout, gameOpts[2]), RandomPlayer()),
-    (MinimaxPlayer(gameOpts[1], gameOpts[2]), MinimaxPlayer(eval_funcs.eval_random_rollout, gameOpts[2]))
+    (gameOpts.minimaxPlayer, RandomPlayer()),
+    (gameOpts.mctsPlayer, RandomPlayer()),
+    (gameOpts.minimaxPlayer, gameOpts.mctsPlayer)
 ]
 play_count = 5
 
-game = gameOpts[0]()
+game = gameOpts.gameClass()
 
 dataFile = Path('./data-{}-{}.csv'.format(sys.argv[1], datetime.datetime.now().strftime('%m_%d-%H_%M')))
 
