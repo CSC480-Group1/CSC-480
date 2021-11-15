@@ -13,48 +13,46 @@ def set_depth_limit(limit: int) -> None:
     global depth_limit
     depth_limit = limit
 
-_tt = {}
-
-def minimax_val(game: Game, eval, alpha: float, beta: float, depthLimit: int) -> int:
+def minimax_val(game: Game, eval, alpha: float, beta: float, depthLimit: int, tt) -> int:
     key = game.getBoardKey()
-    if key in _tt:
-        return _tt[key]
+    if key in tt:
+        return tt[key]
     moves = game.getValidMoves()
     if depthLimit == 0 or len(moves) == 0:
         return eval(game)
     
-    if game.getWhoseMove() == 'BLACK':
+    if game.getPlayer() == 'max':
         max_value = float('-inf')
         for move in moves:
             game.doMove(move)
-            successor_value = minimax_val(game, eval, alpha, beta, depthLimit-1)
+            successor_value = minimax_val(game, eval, alpha, beta, depthLimit-1, tt)
             game.undoMoves(1)
 
             max_value = max(max_value, successor_value)
             if successor_value >= beta:
-                _tt[key] = successor_value
+                tt[key] = successor_value
                 return successor_value
             alpha = max(alpha, successor_value)
 
-        _tt[key] = max_value
+        tt[key] = max_value
         return max_value
     else:
         min_value = float('inf')
         for move in moves:
             game.doMove(move)
-            successor_value = minimax_val(game, eval, alpha, beta, depthLimit-1)
+            successor_value = minimax_val(game, eval, alpha, beta, depthLimit-1, tt)
             game.undoMoves(1)
 
             min_value = min(min_value, successor_value)
             if successor_value <= alpha:
-                _tt[key] = successor_value
+                tt[key] = successor_value
                 return successor_value
             beta = min(beta, successor_value)
         
-        _tt[key] = min_value
+        tt[key] = min_value
         return min_value
 
-def minimax_best_move(game: Game, eval) -> str:
+def minimax_best_move(game: Game, eval, quiet=False, tt={}) -> str:
     global depth_limit
     moves = game.getValidMoves()
     if len(moves) == 0:
@@ -62,19 +60,19 @@ def minimax_best_move(game: Game, eval) -> str:
     
     vals = {}
 
-    if has_tqdm:
+    if not quiet and has_tqdm:
         moveitr = tqdm(moves, desc="Calculating minimax")
     else:
         moveitr = moves
     for move in moveitr:
         game.doMove(move)
-        val = minimax_val(game, eval, float('-inf'), float('inf'), depth_limit)
+        val = minimax_val(game, eval, float('-inf'), float('inf'), depth_limit, tt)
         game.undoMoves(1)
         vals[move] = val
 
     # print(vals)
     
-    if game.getWhoseMove() == 'BLACK':
+    if game.getPlayer() == 'max':
         best = max(vals.values())
     else:
         best = min(vals.values())

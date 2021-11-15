@@ -1,4 +1,5 @@
 from Games import *
+import random
 
 def eval_checkers_1(game: CheckersGame) -> int:
     dim = game.getDim()
@@ -133,4 +134,39 @@ def eval_c4pop10_1(game: C4Pop10Game) -> int:
         score -= 50
     
     return score
-            
+
+try:
+    from tictactoe import TicTacToeGame
+    def eval_tic_tac_toe_1(game: TicTacToeGame) -> int:
+        winner = game.getWinner()
+        if winner is None:
+            print(game.showBoard())
+        assert winner is not None
+        if winner == "max":
+            return 1
+        elif winner == "min":
+            return -1
+        else:
+            return 0
+except ModuleNotFoundError:
+    TicTacToeGame = None
+    eval_tic_tac_toe_1 = None
+
+_num_rollouts = 2
+def eval_random_rollout(game: Game) -> int:
+    score = 0
+    key = game.getBoardKey()
+    for _ in range(_num_rollouts):
+        winner = game.getWinner()
+        count = 0
+        while winner is None:
+            game.doMove(random.choice(game.getValidMoves()))
+            count += 1
+            winner = game.getWinner()
+        game.undoMoves(count)
+        if winner == 'max':
+            score += 1
+        elif winner == 'min':
+            score -= 1
+    assert key == game.getBoardKey()
+    return score

@@ -127,12 +127,12 @@ def _default_policy(game: _Game_Lookahead):
         winner = game.game.getWinner()
     return winner
 
-def mcts(game: Game, player: str, iterations: int):
+def mcts(game: Game, player: str, iterations: int, quiet=False):
     key = game.getBoardKey()
     start_node = _MCTS_Node(None, 0, None, player)
     lookahead = _Game_Lookahead(game)
     iter = range(iterations)
-    if has_tqdm:
+    if not quiet and has_tqdm:
         iter = tqdm(iter, desc='Calculating Monte-Carlo')
     for _ in iter:
         node = _tree_policy(lookahead, start_node)
