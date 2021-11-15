@@ -1,6 +1,8 @@
 import ctypes
+import os
 
-_boardtest = ctypes.CDLL("./boardtest.so")
+dir_path = os.path.dirname(os.path.realpath(__file__))
+_boardtest = ctypes.CDLL(f"{dir_path}{os.path.sep}boardtest.so")
 
 class _RawData(ctypes.Structure):
    _fields_ = [
