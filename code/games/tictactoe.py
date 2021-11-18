@@ -28,6 +28,7 @@ class TicTacToeGame(Game):
     def doMove(self, move: str):
         move = int(move) - 1
         assert not move in self._move_hist
+        assert self._board.flat[move] == ' '
         self._board.flat[move] = self._get_player_letter()
         self._curr_player = _next_player(self._curr_player)
         self._move_hist.append(move)
