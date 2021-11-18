@@ -53,6 +53,8 @@ class TicTacToeGame(Game):
         return out
 
     def getValidMoves(self):
+        if self.getWinner() is not None:
+            return []
         moves = []
         for i, spot in enumerate(self._board.flat):
             if spot == " ":
