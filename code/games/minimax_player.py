@@ -9,7 +9,7 @@ def doPlayerPlay(game: Game, eval) -> None:
     print("Possible moves:")
     for i, move in enumerate(moves):
         game.doMove(move)
-        val = minimax_val(game, eval, float('-inf'), float('inf'), 6, tt=tt)
+        val = minimax_val(game, eval, float('-inf'), float('inf'), 9, tt=tt)
         game.undoMoves(1)
         print("  {}) {} ({})".format(i+1, move, val))
 
@@ -89,13 +89,14 @@ while True:
         print("Enter 'b' or 'w'")
 
 while True:
-    moves = game.getValidMoves()
-    if len(moves) == 0:
+    if game.getWinner() is not None:
         break
     print("\n\n")
     print(game.showBoard())
     doMinimaxPlay(game, eval)
     if not no_player:
+        if game.getWinner() is not None:
+            break
         print("\n\n")
         print(game.showBoard())
         doPlayerPlay(game, eval)
