@@ -30,7 +30,6 @@ def minimax_val(game: Game, eval, alpha: float, beta: float, depthLimit: int, tt
 
             max_value = max(max_value, successor_value)
             if successor_value >= beta:
-                tt[key] = successor_value
                 return successor_value
             alpha = max(alpha, successor_value)
 
@@ -45,7 +44,6 @@ def minimax_val(game: Game, eval, alpha: float, beta: float, depthLimit: int, tt
 
             min_value = min(min_value, successor_value)
             if successor_value <= alpha:
-                tt[key] = successor_value
                 return successor_value
             beta = min(beta, successor_value)
         
@@ -75,6 +73,7 @@ def minimax_best_move(game: Game, eval, quiet=False, tt={}) -> str:
     if game.getPlayer() == 'max':
         best = max(vals.values())
     else:
+        assert game.getPlayer() == 'min'
         best = min(vals.values())
 
     # print(best)
