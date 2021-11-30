@@ -17,6 +17,9 @@ elif platform.system() == "Linux":
       _boardtest_file = _dir_path / "boardtest.so"
    elif platform.machine() == "aarch64":
       _boardtest_file = _dir_path / "boardtest-aarch64.so"
+elif platform.system() == "Darwin":
+   if platform.machine() == "x86_64":
+	   _boardtest_file = _dir_path / "boardtest-darwin-x86_64.so"
 
 if _boardtest_file is None:
    raise Exception("Unsupported platform")
