@@ -30,16 +30,17 @@ class Player(ABC):
         pass
 
 class MonteCarloPlayer(Player):
-    def __init__(self, num_iter = 300):
+    def __init__(self, num_iter = 300, c=1):
         self._num_iter = num_iter
+        self._c = c
     
     def play(self, game: Game):
-        move = mcts.mcts(game, game.getPlayer(), self._num_iter, quiet=True)
+        move = mcts.mcts(game, game.getPlayer(), self._num_iter, quiet=True, c=self._c)
         #print("Mcts plays {}".format(move))
         game.doMove(move)
     
     def __str__(self):
-        return "{}(num_iter={})".format(self.__class__.__name__, self._num_iter)
+        return "{}(num_iter={},c={})".format(self.__class__.__name__, self._num_iter, self._c)
 
 class MinimaxPlayer(Player):
     def __init__(self, eval_func, depth_limit=6):
@@ -106,13 +107,13 @@ class GameOpts:
         self.mctsPlayer = mctsPlayer
 
 games = {
-    "checkers": GameOpts(CheckersGame, MinimaxPlayer(eval_funcs.eval_checkers_1, 6), MonteCarloPlayer(num_iter=500)),
-    "othello": GameOpts(OthelloGame, MinimaxPlayer(eval_funcs.eval_othello_1, 4), MonteCarloPlayer()),
-    "c4pop10": GameOpts(C4Pop10Game, MinimaxPlayer(eval_funcs.eval_c4pop10_1, 6), MonteCarloPlayer())
+    "checkers": GameOpts(CheckersGame, MinimaxPlayer(eval_funcs.eval_checkers_1, 6), MonteCarloPlayer(num_iter=500, c=1.414)),
+    "othello": GameOpts(OthelloGame, MinimaxPlayer(eval_funcs.eval_othello_1, 4), MonteCarloPlayer(num_iter=500, c=1.414)),
+    "c4pop10": GameOpts(C4Pop10Game, MinimaxPlayer(eval_funcs.eval_c4pop10_1, 6), MonteCarloPlayer(num_iter=500, c=1.414))
 }
 
 if TicTacToeGame is not None:
-    games["tic tac toe"] = GameOpts(TicTacToeGame, MinimaxPlayer(eval_funcs.eval_tic_tac_toe_1, 9), MonteCarloPlayer())
+    games["tic tac toe"] = GameOpts(TicTacToeGame, MinimaxPlayer(eval_funcs.eval_tic_tac_toe_1, 9), MonteCarloPlayer(num_iter=500, c=1.414))
 
 if len(sys.argv) < 2:
     print("No game specified")

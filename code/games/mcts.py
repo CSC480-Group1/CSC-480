@@ -68,7 +68,7 @@ class _MCTS_Node:
         else:
             return 0
 
-    def get_ucb(self, c=1):
+    def get_ucb(self, c):
         if self.count == 0:
             raise ValueError("Must be updated at least once to calculate UCB")
         p_win = self._get_expected_value()
@@ -91,11 +91,11 @@ def _expand(game: _Game_Lookahead, node):
     return None
 
 
-def _best_child(node, c=1):
+def _best_child(node, c):
     return max(node.children.values(), key=lambda child: child.get_ucb(c))
 
 
-def _tree_policy(game: _Game_Lookahead, node):
+def _tree_policy(game: _Game_Lookahead, node, c):
     assert game.depth == node.depth
 
     if game.game.getWinner() is not None:
@@ -106,9 +106,9 @@ def _tree_policy(game: _Game_Lookahead, node):
         game.doMove(unexplored_child.move)
         return unexplored_child
     else:
-        next = _best_child(node)
+        next = _best_child(node, c)
         game.doMove(next.move)
-        return _tree_policy(game, next)
+        return _tree_policy(game, next, c)
 
 def _backup(node, winner):
     if node is None:
@@ -127,7 +127,7 @@ def _default_policy(game: _Game_Lookahead):
         winner = game.game.getWinner()
     return winner
 
-def mcts(game: Game, player: str, iterations: int, quiet=False):
+def mcts(game: Game, player: str, iterations: int, quiet=False, c=1):
     key = game.getBoardKey()
     start_node = _MCTS_Node(None, 0, None, player)
     lookahead = _Game_Lookahead(game)
@@ -135,7 +135,7 @@ def mcts(game: Game, player: str, iterations: int, quiet=False):
     if not quiet and has_tqdm:
         iter = tqdm(iter, desc='Calculating Monte-Carlo')
     for _ in iter:
-        node = _tree_policy(lookahead, start_node)
+        node = _tree_policy(lookahead, start_node, c)
         value = _default_policy(lookahead)
         lookahead.undoMoves(lookahead.depth)
         _backup(node, value)
