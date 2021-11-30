@@ -2,14 +2,13 @@ from Games import *
 from eval_funcs import *
 from minimax import *
 
-tt = {}
 
 def doPlayerPlay(game: Game, eval) -> None:
     moves = game.getValidMoves()
     print("Possible moves:")
     for i, move in enumerate(moves):
         game.doMove(move)
-        val = minimax_val(game, eval, float('-inf'), float('inf'), 9, tt=tt)
+        val = minimax_val(game, eval, float('-inf'), float('inf'), 9)
         game.undoMoves(1)
         print("  {}) {} ({})".format(i+1, move, val))
 
@@ -31,7 +30,7 @@ def doPlayerPlay(game: Game, eval) -> None:
     game.doMove(move)
 
 def doMinimaxPlay(game: Game, eval) -> None:
-    move = minimax_best_move(game, eval, tt=tt)
+    move = minimax_best_move(game, eval)
     print("Minimax plays {}".format(move))
     game.doMove(move)
 

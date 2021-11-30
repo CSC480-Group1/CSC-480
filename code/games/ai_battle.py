@@ -29,9 +29,6 @@ class Player(ABC):
     def play(self, game: Game):
         pass
 
-    def reset(self):
-        pass
-
 class MonteCarloPlayer(Player):
     def __init__(self, num_iter = 300):
         self._num_iter = num_iter
@@ -50,15 +47,10 @@ class MinimaxPlayer(Player):
         self._depth_limit = depth_limit
         minimax.set_depth_limit(depth_limit)
 
-        self._tt = {}
-
     def play(self, game: Game):
-        move = minimax.minimax_best_move(game, self._eval_func, quiet=True, tt=self._tt)
+        move = minimax.minimax_best_move(game, self._eval_func, quiet=True)
         #print("Minimax plays {}".format(move))
         game.doMove(move)
-
-    def reset(self):
-        self._tt = {}
     
     def __str__(self):
         return "{}(eval_func={},depth_limit={})".format(self.__class__.__name__, self._eval_func.__name__, self._depth_limit)
@@ -78,8 +70,6 @@ move_limit = 300
 def play_game(game, maxPlayer, minPlayer):
     moveCount = 0
     max_tottime = min_tottime = 0
-    maxPlayer.reset()
-    minPlayer.reset()
     while True:
         moveCount += 1
         if moveCount == move_limit:
