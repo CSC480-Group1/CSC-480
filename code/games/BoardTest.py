@@ -13,7 +13,10 @@ if platform.system() == "Windows":
    elif platform.machine() == "x86":
       _boardtest_file = _dir_path / "boardtest.dll"
 elif platform.system() == "Linux":
-   _boardtest_file = _dir_path / "boardtest.so"
+   if platform.machine() == "x86_64":
+      _boardtest_file = _dir_path / "boardtest.so"
+   elif platform.machine() == "aarch64":
+      _boardtest_file = _dir_path / "boardtest-aarch64.so"
 
 if _boardtest_file is None:
    raise Exception("Unsupported platform")
