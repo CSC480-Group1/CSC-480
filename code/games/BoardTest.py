@@ -1,23 +1,26 @@
 import ctypes
 import platform
-import os
+from pathlib import Path
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
-dir_path = f"{dir_path}{os.path.sep}bins{os.path.sep}"
+_dir_path = Path(__file__).resolve().parent / "bins"
+
+assert _dir_path.is_dir()
 
 _boardtest_file = None
 if platform.system() == "Windows":
    if platform.machine() == "AMD64":
-      _boardtest_file = "boardtest-x64.dll"
+      _boardtest_file = _dir_path / "boardtest-x64.dll"
    elif platform.machine() == "x86":
-      _boardtest_file = "boardtest.dll"
+      _boardtest_file = _dir_path / "boardtest.dll"
 elif platform.system() == "Linux":
-   _boardtest_file = "boardtest.so"
+   _boardtest_file = _dir_path / "boardtest.so"
 
 if _boardtest_file is None:
    raise Exception("Unsupported platform")
 
-_boardtest = ctypes.CDLL(f"{dir_path}{_boardtest_file}")
+assert _boardtest_file.is_file()
+
+_boardtest = ctypes.CDLL(str(_boardtest_file))
 
 class _RawData(ctypes.Structure):
    _fields_ = [
