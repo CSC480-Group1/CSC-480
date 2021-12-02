@@ -29,8 +29,8 @@ def doPlayerPlay(game: Game, eval) -> None:
     
     game.doMove(move)
 
-def doMinimaxPlay(game: Game, eval) -> None:
-    move = minimax_best_move(game, eval)
+def doMinimaxPlay(game: Game, eval, depth_limit) -> None:
+    move = minimax_best_move(game, eval, depth_limit=depth_limit)
     print("Minimax plays {}".format(move))
     game.doMove(move)
 
@@ -45,22 +45,22 @@ if TicTacToeGame is not None:
 while True:
     response = input('> ')
     if response == '1':
-        set_depth_limit(6)
+        depth_limit = 6
         game = CheckersGame()
         eval = eval_checkers_1
         break
     elif response == '2':
-        set_depth_limit(4)
+        depth_limit = 4
         game = OthelloGame()
         eval = eval_othello_1
         break
     elif response == '3':
-        set_depth_limit(6)
+        depth_limit = 6
         game = C4Pop10Game()
         eval = eval_c4pop10_1
         break
     elif TicTacToeGame is not None and response == '4':
-        set_depth_limit(9)
+        depth_limit = 9
         game = TicTacToeGame()
         eval = eval_tic_tac_toe_1
         break
@@ -92,7 +92,7 @@ while True:
         break
     print("\n\n")
     print(game.showBoard())
-    doMinimaxPlay(game, eval)
+    doMinimaxPlay(game, eval, depth_limit)
     if not no_player:
         if game.getWinner() is not None:
             break

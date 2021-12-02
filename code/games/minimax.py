@@ -7,12 +7,6 @@ try:
 except ModuleNotFoundError:
     has_tqdm = False
 
-depth_limit = 2
-
-def set_depth_limit(limit: int) -> None:
-    global depth_limit
-    depth_limit = limit
-
 def minimax_val(game: Game, eval, alpha: float, beta: float, depthLimit: int) -> int:
     key = game.getBoardKey()
     moves = game.getValidMoves()
@@ -44,8 +38,7 @@ def minimax_val(game: Game, eval, alpha: float, beta: float, depthLimit: int) ->
             beta = min(beta, successor_value)
         return min_value
 
-def minimax_best_move(game: Game, eval, quiet=False) -> str:
-    global depth_limit
+def minimax_best_move(game: Game, eval, quiet=False, depth_limit=2) -> str:
     moves = game.getValidMoves()
     if len(moves) == 0:
         raise ValueError('Game is already over')

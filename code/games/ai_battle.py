@@ -46,10 +46,9 @@ class MinimaxPlayer(Player):
     def __init__(self, eval_func, depth_limit=6):
         self._eval_func = eval_func
         self._depth_limit = depth_limit
-        minimax.set_depth_limit(depth_limit)
 
     def play(self, game: Game):
-        move = minimax.minimax_best_move(game, self._eval_func, quiet=True)
+        move = minimax.minimax_best_move(game, self._eval_func, quiet=True, depth_limit=self._depth_limit)
         #print("Minimax plays {}".format(move))
         game.doMove(move)
     
