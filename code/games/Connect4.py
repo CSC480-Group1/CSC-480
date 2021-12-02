@@ -2,8 +2,8 @@
 from itertools import groupby, chain
 
 NONE = '.'
-RED = 'R'
-YELLOW = 'Y'
+BLACK = 'B'
+WHITE = 'W'
 
 
 def diagonalsPos(matrix, cols, rows):
@@ -23,14 +23,22 @@ class Connect4Impl:
         self.cols = cols
         self.rows = rows
         self.win = requiredToWin
-        self.turn = RED
+        self.turn = BLACK
         self.board = [[NONE] * rows for _ in range(cols)]
+        self.game_over = False
+
+    def reset_game(self):
+        self.turn = BLACK
+        self.board = [[NONE] * self.rows for _ in range(self.cols)]
+        self.game_over = False
 
     def insert(self, column, shadow=False):
         color = self.turn
         c = self.board[column]
         if c[0] != NONE:
-            print('Column is full')
+            if not shadow:
+                self.printBoard()
+                print(f'Column {column} is full')
             return False
 
         i = -1
@@ -40,20 +48,25 @@ class Connect4Impl:
         if not shadow:
             c[i] = color
 
-            self.checkForWin()
-            self.turn = YELLOW if self.turn == RED else RED
+            have_won = self.checkForWin()
+            if have_won:
+                self.game_over = True
+            else:
+                self.turn = WHITE if self.turn == BLACK else BLACK
         return True
 
 
     def getWhoseMove(self):
-        return 'Red' if self.turn == RED else 'Yellow'
+        return 'BLACK' if self.turn == BLACK else 'WHITE'
 
 
     def checkForWin(self):
         w = self.getWinner()
-        if w:
+        return w
+        """ if w:
             self.printBoard()
-            raise Exception(w + ' won!')
+            # raise Exception(w + ' won!')
+            print(w + ' won!') """
 
 
     def getWinner(self):
@@ -69,22 +82,29 @@ class Connect4Impl:
                 if color != NONE and len(list(group)) >= self.win:
                     return color
 
+    @staticmethod
+    def getRepr(board, rows, cols):
+        string = '   ' + '  '.join(map(str, range(cols))) + '\n'
+        for y in range(rows):
+            string += '  '.join([str(y)] + [str(board[x][y]) for x in range(cols)]) + '\n'
+
+        return string
+
+    def getBoardRepr(self):
+        return Connect4Impl.getRepr(self.board, self.rows, self.cols)
 
     def printBoard(self):
-        print('   ' + '  '.join(map(str, range(self.cols))))
-        for y in range(self.rows):
-            print('  '.join([str(y)] + [str(self.board[x][y]) for x in range(self.cols)]))
-        print()
-
+        print(self.getBoardRepr())
 
     def getValidMoves(self):
+        if self.game_over:
+            return []
+
         valid_moves = list(filter(lambda col: self.insert(col, shadow=True), range(self.cols)))
         for c in range(self.cols):
             success = self.insert(c, shadow=True)
         
         return valid_moves
-
-
 
 
 if __name__ == '__main__':

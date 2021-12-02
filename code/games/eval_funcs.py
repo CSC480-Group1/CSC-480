@@ -1,6 +1,17 @@
 from Games import *
+import numpy as np
+from functools import reduce
+from Connect4 import BLACK, WHITE, NONE, diagonalsNeg, diagonalsPos
+from itertools import groupby, chain
 
-def eval_checkers_1(game: CheckersGame) -> int:
+class GameEvalFuncs:
+    def __init__(self, evaluator, remove_depth_from_score=(lambda s, d: s), depth_affected_score=(lambda s, d: s)):
+        self.evaluator = evaluator
+        self.remove_depth_from_score = remove_depth_from_score
+        self.depth_affected_score = depth_affected_score
+
+
+def eval_checkers_1(game: CheckersGame, depth=None) -> int:
     dim = game.getDim()
 
     if len(game.getValidMoves()) == 0:
@@ -81,7 +92,7 @@ def _eval_othello_1_position_multiplier(row: int, col: int, dim: int) -> int:
     assert row > 1 and row < (dim - 2) and col > 1 and col < (dim - 2)
     return 1
 
-def eval_othello_1(game: OthelloGame) -> int:
+def eval_othello_1(game: OthelloGame, depth=None) -> int:
     dim = game.getDim()
 
     if len(game.getValidMoves()) == 0:
@@ -112,4 +123,64 @@ def eval_othello_1(game: OthelloGame) -> int:
             val += sign * _eval_othello_1_position_multiplier(row, col, dim)
 
     return val
-            
+
+def __win_connect4(num: int, last_move_player: str, depth: int) -> float:
+    score = connect4_depth_affected_score(num, depth)
+    if last_move_player != BLACK:
+        return score * -1
+    return score
+
+def connect4_depth_affected_score(score: float, depth: int) -> float:
+    return score / max(depth, 1)
+
+def connect4_get_unaffected_score(score: float, depth: int) -> float:
+    return score * depth
+
+def __check_win_connect4(game: Connect4, depth: int):
+    max_rows, max_cols = game.getDimensions()
+
+    board_copy = game.getBoardCopy()
+    board = np.array(board_copy, dtype=np.chararray)
+    last_move_col = game.getMoveHist()
+
+    if len(last_move_col) < 7:
+        return 0 # Not enough moves played to win
+
+    actual_move = last_move_col[-1]
+    row, col = np.min(np.where(board[actual_move] != NONE)), actual_move
+    last_move_player = board[col][row]
+
+    col_safe = max(0, col - 4)
+    winner = 0
+    # print(row, col)
+    if row < max_rows - 3:
+        vert_check = np.all(board[col, row:(row+4)] == last_move_player)
+        if vert_check:
+            # print('win vert', last_move_player)
+            # print(board[col, row:(row+3)])
+            return __win_connect4(1, last_move_player, depth)
+
+    player_moves_in_row = np.where(board[:, row] == last_move_player)[0]
+    if len(player_moves_in_row) >= 4:
+        for c in range(player_moves_in_row[0], max_cols - 3):
+            row_check = np.all(board[c:(c+4), row] == last_move_player)
+            # print(board[c:(c+4), row] == last_move_player)
+            if row_check:
+                # print('win row', last_move_player)
+                # print(board[c:(c+3), row])
+                return __win_connect4(1, last_move_player, depth)
+
+    lines = (
+        diagonalsPos(board, max_cols, max_rows),  # positive diagonals
+        diagonalsNeg(board, max_cols, max_rows)  # negative diagonals
+    )
+    for line in chain(*lines):
+        for color, group in groupby(line):
+            if color != NONE and len(list(group)) >= 4:
+                return __win_connect4(1, color, depth)
+    
+    return 0
+
+
+def eval_connect4_1(game: Connect4, depth: int) -> int:
+    return __check_win_connect4(game, depth)
