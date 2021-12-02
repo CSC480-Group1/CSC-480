@@ -105,65 +105,66 @@ class GameOpts:
         self.minimaxPlayer = minimaxPlayer
         self.mctsPlayer = mctsPlayer
 
-games = {
-    "checkers": GameOpts(CheckersGame, MinimaxPlayer(eval_funcs.eval_checkers_1, 6), MonteCarloPlayer(num_iter=500, c=1.414)),
-    "othello": GameOpts(OthelloGame, MinimaxPlayer(eval_funcs.eval_othello_1, 4), MonteCarloPlayer(num_iter=500, c=1.414)),
-    "c4pop10": GameOpts(C4Pop10Game, MinimaxPlayer(eval_funcs.eval_c4pop10_1, 6), MonteCarloPlayer(num_iter=500, c=1.414))
-}
+if __name__ == "__main__":
+    games = {
+        "checkers": GameOpts(CheckersGame, MinimaxPlayer(eval_funcs.eval_checkers_1, 6), MonteCarloPlayer(num_iter=500, c=1.414)),
+        "othello": GameOpts(OthelloGame, MinimaxPlayer(eval_funcs.eval_othello_1, 4), MonteCarloPlayer(num_iter=500, c=1.414)),
+        "c4pop10": GameOpts(C4Pop10Game, MinimaxPlayer(eval_funcs.eval_c4pop10_1, 6), MonteCarloPlayer(num_iter=500, c=1.414))
+    }
 
-if TicTacToeGame is not None:
-    games["tic tac toe"] = GameOpts(TicTacToeGame, MinimaxPlayer(eval_funcs.eval_tic_tac_toe_1, 9), MonteCarloPlayer(num_iter=500, c=1.414))
+    if TicTacToeGame is not None:
+        games["tic tac toe"] = GameOpts(TicTacToeGame, MinimaxPlayer(eval_funcs.eval_tic_tac_toe_1, 9), MonteCarloPlayer(num_iter=500, c=1.414))
 
-if len(sys.argv) < 2:
-    print("No game specified")
-    exit(1)
+    if len(sys.argv) < 2:
+        print("No game specified")
+        exit(1)
 
-if TicTacToeGame is None and sys.argv[1] == "tic tac toe":
-    print("Tic tac toe requires numpy")
-    exit(1)
+    if TicTacToeGame is None and sys.argv[1] == "tic tac toe":
+        print("Tic tac toe requires numpy")
+        exit(1)
 
-if sys.argv[1] not in games:
-    print("Unknown game {}".format(sys.argv[1]))
-    exit(1)
+    if sys.argv[1] not in games:
+        print("Unknown game {}".format(sys.argv[1]))
+        exit(1)
 
-gameOpts = games[sys.argv[1]]
+    gameOpts = games[sys.argv[1]]
 
-pairs = [
-    (gameOpts.minimaxPlayer, RandomPlayer()),
-    (gameOpts.mctsPlayer, RandomPlayer()),
-    (gameOpts.minimaxPlayer, gameOpts.mctsPlayer)
-]
-play_count = 5
+    pairs = [
+        (gameOpts.minimaxPlayer, RandomPlayer()),
+        (gameOpts.mctsPlayer, RandomPlayer()),
+        (gameOpts.minimaxPlayer, gameOpts.mctsPlayer)
+    ]
+    play_count = 5
 
-game = gameOpts.gameClass()
+    game = gameOpts.gameClass()
 
-dataFile = Path('./data-{}-{}.csv'.format(sys.argv[1], datetime.datetime.now().strftime('%m_%d-%H_%M')))
+    dataFile = Path('./data-{}-{}.csv'.format(sys.argv[1], datetime.datetime.now().strftime('%m_%d-%H_%M')))
 
-print("Playing", game.__class__.__name__)
+    print("Playing", game.__class__.__name__)
 
-if has_tqdm:
-    pbar = tqdm.tqdm(total=(len(pairs) * 2 * play_count), desc='Simulating games')
+    if has_tqdm:
+        pbar = tqdm.tqdm(total=(len(pairs) * 2 * play_count), desc='Simulating games')
 
 
-with dataFile.open('w') as df:
-    writer = csv.DictWriter(df, fieldnames=['game', 'max', 'min', 'winner', 'max_tottime', 'min_tottime', 'move_count'])
-    writer.writeheader()
-    try:
-        for pair in pairs:
-            print(str(pair[0]), "vs.", str(pair[1]))
-            for _ in range(play_count):
-                result = play_game(game, pair[0], pair[1])
-                writer.writerow(result)
-                if has_tqdm:
-                    pbar.update()
-            for _ in range(play_count):
-                result = play_game(game, pair[1], pair[0])
-                writer.writerow(result)
-                if has_tqdm:
-                    pbar.update()
-    except KeyboardInterrupt:
-        print("Interrupted!")
+    with dataFile.open('w') as df:
+        writer = csv.DictWriter(df, fieldnames=['game', 'max', 'min', 'winner', 'max_tottime', 'min_tottime', 'move_count'])
+        writer.writeheader()
+        try:
+            for pair in pairs:
+                print(str(pair[0]), "vs.", str(pair[1]))
+                for _ in range(play_count):
+                    result = play_game(game, pair[0], pair[1])
+                    writer.writerow(result)
+                    if has_tqdm:
+                        pbar.update()
+                for _ in range(play_count):
+                    result = play_game(game, pair[1], pair[0])
+                    writer.writerow(result)
+                    if has_tqdm:
+                        pbar.update()
+        except KeyboardInterrupt:
+            print("Interrupted!")
 
-if has_tqdm:
-    pbar.close()
+    if has_tqdm:
+        pbar.close()
 
