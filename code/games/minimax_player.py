@@ -2,27 +2,18 @@ from Games import *
 from eval_funcs import *
 from minimax import *
 
+
 def doPlayerPlay(game: Game, eval) -> None:
     moves = game.getValidMoves()
     if len(moves) == 0:
         return
     print("Possible moves:")
     for i, move in enumerate(moves):
-        # print(f'BEFORE MOVE {move}')
-        # print(game.showBoard())
         game.doMove(move)
-        # print(f'BEFORE MINIMAX {move}')
-        # print(game.showBoard())
-        val = minimax_val(game, eval, float('-inf'), float('inf'), 2)
-        # print(f'AFTER MINIMAX {move}')
-        # print(game.showBoard())
+        val = minimax_val(game, eval, float('-inf'), float('inf'), 9)
         game.undoMoves(1)
-        # print(f'AFTER UNDO {move}')
-        # print(game.showBoard())
         print("  {}) {} ({})".format(i+1, move, val))
 
-    # print('Game board')
-    # print(game.showBoard())
     move = ""
     
     while True:
@@ -43,8 +34,8 @@ def doPlayerPlay(game: Game, eval) -> None:
     
     game.doMove(move)
 
-def doMinimaxPlay(game: Game, eval) -> None:
-    move = minimax_best_move(game, eval)
+def doMinimaxPlay(game: Game, eval, depth_limit) -> None:
+    move = minimax_best_move(game, eval, depth_limit=depth_limit)
     print("Minimax plays {}".format(move))
     game.doMove(move)
 
@@ -53,25 +44,41 @@ print("Game options:")
 print("  1) Checkers")
 print("  2) Othello")
 print("  3) Basic Connect4")
+print("  4) C4Pop10")
+if TicTacToeGame is not None:
+    print("  5) Tic Tac Toe")
 
 while True:
     response = input('> ')
     if response == '1':
-        set_depth_limit(6)
+        depth_limit = 6
         game = CheckersGame()
         eval = GameEvalFuncs(eval_checkers_1)
         break
     elif response == '2':
-        set_depth_limit(4)
+        depth_limit = 4
         game = OthelloGame()
         eval = GameEvalFuncs(eval_othello_1)
         break
     elif response == '3':
         set_depth_limit(10)
         game = Connect4()
-        eval = GameEvalFuncs(eval_connect4_1, connect4_get_unaffected_score, connect4_depth_affected_score)
+        eval = GameEvalFuncs(eval_connect4_1)
         break
-    print("Choices are '1' or '2'")
+    elif response == '3':
+        depth_limit = 6
+        game = C4Pop10Game()
+        eval = eval_c4pop10_1
+        break
+    elif TicTacToeGame is not None and response == '4':
+        depth_limit = 9
+        game = TicTacToeGame()
+        eval = eval_tic_tac_toe_1
+        break
+    if TicTacToeGame is None:
+        print("Choices are '1', '2', '3'")
+    else:
+        print("Choices are '1', '2', '3', '4'")
 
 no_player = False
 
@@ -93,16 +100,14 @@ while True:
         print("Enter 'b' or 'w'")
 
 while True:
-    # print('IN HERE')
-    moves = game.getValidMoves()
-    if len(moves) == 0:
+    if game.getWinner() is not None:
         break
     print("\n\n")
     print(game.showBoard())
-    doMinimaxPlay(game, eval)
-    # print('HERE!')
-    # print(game.showBoard())
+    doMinimaxPlay(game, eval, depth_limit)
     if not no_player:
+        if game.getWinner() is not None:
+            break
         print("\n\n")
         print(game.showBoard())
         doPlayerPlay(game, eval)
@@ -110,11 +115,11 @@ while True:
 print("\n\n")
 print(game.showBoard())
 
-final_score = eval.evaluator(game, 0)
+final_score = eval(game)
 
 if final_score == 0:
     print("Draw!")
 elif final_score > 0:
-    print("Black wins!")
+    print("Max wins!")
 else:
-    print("White wins!")
+    print("Min wins!")
