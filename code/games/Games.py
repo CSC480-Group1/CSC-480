@@ -403,6 +403,21 @@ class Connect4(Game):
    def getWhoseMove(self):
       return self.game.getWhoseMove()
 
+   def getPlayer(self):
+      if self.getWhoseMove() == 'BLACK':
+         return 'max'
+      else:
+         return 'min'
+
+   def getWinner(self):
+      if len(self.getValidMoves()) != 0:
+         return None
+
+      if self.getPlayer() == "max":
+         return "min"
+      else:
+         return "max"
+
    def getDimensions(self):
       return (self.game.rows, self.game.cols)
 

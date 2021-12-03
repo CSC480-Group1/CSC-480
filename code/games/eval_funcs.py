@@ -11,6 +11,9 @@ class GameEvalFuncs:
         self.remove_depth_from_score = remove_depth_from_score
         self.depth_affected_score = depth_affected_score
 
+    def __call__(self, game: Game) -> float:
+        return self.evaluator(game)
+
 
 def eval_checkers_1(game: CheckersGame, depth=None) -> int:
     dim = game.getDim()
@@ -183,8 +186,10 @@ def __check_win_connect4(game: Connect4, depth: int):
     return 0
 
 
-def eval_connect4_1(game: Connect4, depth: int) -> int:
+def eval_connect4_1(game: Connect4, depth=1) -> int:
     return __check_win_connect4(game, depth)
+
+
 def eval_c4pop10_1(game: C4Pop10Game) -> int:
     redScore = game.getRedScore()
     yellowScore = game.getYellowScore()

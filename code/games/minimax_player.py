@@ -39,14 +39,14 @@ def doMinimaxPlay(game: Game, eval, depth_limit) -> None:
     print("Minimax plays {}".format(move))
     game.doMove(move)
 
+game_options = ['Checkers', 'Othello', 'Basic Connect4', 'C4Pop10']
+if TicTacToeGame is not None:
+    game_options.append('Tic Tac Toe')
 
 print("Game options:")
-print("  1) Checkers")
-print("  2) Othello")
-print("  3) Basic Connect4")
-print("  4) C4Pop10")
-if TicTacToeGame is not None:
-    print("  5) Tic Tac Toe")
+for i, opt in enumerate(game_options):
+    print(f"  {i+1}) {opt}")
+
 
 while True:
     response = input('> ')
@@ -61,7 +61,7 @@ while True:
         eval = GameEvalFuncs(eval_othello_1)
         break
     elif response == '3':
-        set_depth_limit(10)
+        depth_limit = 4
         game = Connect4()
         eval = GameEvalFuncs(eval_connect4_1)
         break
@@ -70,15 +70,12 @@ while True:
         game = C4Pop10Game()
         eval = eval_c4pop10_1
         break
-    elif TicTacToeGame is not None and response == '4':
+    elif TicTacToeGame is not None and response == '5':
         depth_limit = 9
         game = TicTacToeGame()
         eval = eval_tic_tac_toe_1
         break
-    if TicTacToeGame is None:
-        print("Choices are '1', '2', '3'")
-    else:
-        print("Choices are '1', '2', '3', '4'")
+    print("Choices are " + ', '.join([f"'{i+1}'" for i in range(len(game_options))]))
 
 no_player = False
 
@@ -89,7 +86,6 @@ while True:
         print("\n\n")
         print(game.showBoard())
         doPlayerPlay(game, eval)
-        # print(game.showBoard())
         break
     elif response == "w":
         break
