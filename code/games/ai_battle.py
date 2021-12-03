@@ -226,6 +226,7 @@ class CSVGameWrite:
             raise Exception('Writer must first be opened!')
 
         if not self.wrote_header:
+            self.wrote_header = True
             self.writer.writeheader()
 
         self.writer.writerow(row)
