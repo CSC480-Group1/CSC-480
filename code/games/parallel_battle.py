@@ -1,123 +1,156 @@
 import threading
 import subprocess
-import json
 import sys
-import datetime
-from pathlib import Path
+from Games import Game
+from Player import Player
+from ai_battle import AIBattle, AllPlayerBattle
+import pickle
+import queue
+
 try:
     import tqdm
 except ModuleNotFoundError:
     tqdm = None
-import csv
-
-max_threads = 10
-
-game_sem = threading.Semaphore(max_threads)
-stdout_lock = threading.Lock()
-
-games = {
-    "checkers": ("Games.CheckersGame()", "ai_battle.MinimaxPlayer(eval_funcs.eval_checkers_1, 6)", "ai_battle.MonteCarloPlayer(num_iter=500, c=1.414)"),
-    "othello": ("Games.OthelloGame()", "ai_battle.MinimaxPlayer(eval_funcs.eval_othello_1, 4)", "ai_battle.MonteCarloPlayer(num_iter=500, c=1.414)"),
-    "c4pop10": ("Games.C4Pop10Game()", "ai_battle.MinimaxPlayer(eval_funcs.eval_c4pop10_1, 6)", "ai_battle.MonteCarloPlayer(num_iter=500, c=1.414)")
-}
-
-codestr = """
-import ai_battle
-import Games
-import eval_funcs
-import json
-print(json.dumps(ai_battle.play_game({}, {}, {})))
-"""
-
-if len(sys.argv) < 2:
-    print("No game specified")
-    exit(1)
-
-
-if sys.argv[1] not in games:
-    print("Unknown game {}".format(sys.argv[1]))
-    exit(1)
-
-gameOpts = games[sys.argv[1]]
-
-pairs = [
-    (gameOpts[1], "ai_battle.RandomPlayer()"),
-    (gameOpts[2], "ai_battle.RandomPlayer()"),
-    (gameOpts[1], gameOpts[2])
-]
-play_count = 5
-
-game = gameOpts[0]
-
-dataFile = Path('./data-{}-{}.csv'.format(sys.argv[1], datetime.datetime.now().strftime('%m_%d-%H_%M')))
-
-print("Playing", game)
-
-def run_subgame(idx: int, outdict, game: str, player1: str, player2: str):
-    with game_sem:
-        result = subprocess.run([
-            sys.executable,
-            "-c",
-            codestr.format(game, player1, player2)
-        ],
-        stdin=subprocess.DEVNULL,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE)
-
-    if result.returncode != 0:
-        with stdout_lock:
-            print("Error running game (rc={}):".format(result.returncode))
-            print("---OUTPUT---")
-            print(result.stdout)
-            print(result.stderr)
-            print("------------")
-    else:
-        try:
-            outdict[idx] = json.loads(result.stdout)
-        except json.decoder.JSONDecodeError:
-            print("Invalid output from game:")
-            print("---OUTPUT---")
-            print(result.stdout)
-            print(result.stderr)
-            print("------------")
-
-threads = []
-results = {}
-i = 0
-
-for pair in pairs:
-    for _ in range(play_count):
-        threads.append(threading.Thread(target=run_subgame, args=(i, results, game, pair[0], pair[1])))
-        i += 1
-    for _ in range(play_count):
-        threads.append(threading.Thread(target=run_subgame, args=(i, results, game, pair[1], pair[0])))
-        i += 1
-
-for thread in threads:
-    thread.start()
-
-if tqdm is not None:
-    pbar = tqdm.tqdm(total=(len(pairs) * 2 * play_count), desc='Simulating games')
 
 try:
-    for thread in threads:
-        thread.join()
-        if tqdm is not None:
+    from tictactoe import TicTacToeGame
+except ModuleNotFoundError:
+    TicTacToeGame = None
+
+
+max_subprocesses = 10
+
+game_sem = threading.Semaphore(max_subprocesses)
+stdout_lock = threading.Lock()
+
+codestr = """
+import pickle
+import sys
+from ai_battle import AIBattle
+args = pickle.load(sys.stdin.buffer)
+result = AIBattle._play_game(args[0](), args[1], args[2], args[3])
+pickle.dump(result, sys.stdout.buffer)
+"""
+
+class ParallelBattle(AIBattle):
+    def __init__(self, game: Game, p1: Player, p2: Player, update=print, move_limit=300, play_count=5) -> None:
+        super().__init__(game, p1, p2, update, move_limit, play_count)
+        self.__results = queue.Queue()
+
+    def __run_subgame(self, maxPlayer, minPlayer):
+        pickled_args = pickle.dumps((self.game.__class__, self.move_limit, maxPlayer, minPlayer))
+        with game_sem:
+            subproc = subprocess.Popen([
+                sys.executable,
+                "-c",
+                codestr.format(
+                    f"{self.game.__class__.__name__}()",
+                    str(maxPlayer),
+                    str(minPlayer),
+                    self.move_limit
+                )
+            ],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+
+            sub_stdout, sub_stderr = subproc.communicate(input=pickled_args)
+
+        if subproc.returncode != 0:
             with stdout_lock:
-                pbar.update()
-except KeyboardInterrupt:
-    print("Interrupted!")
+                print("Error running game (rc={}):".format(subproc.returncode))
+                print("---OUTPUT---")
+                print(sub_stdout)
+                print(sub_stderr.decode('utf8'))
+                print("------------")
+        else:
+            try:
+                self.__results.put(pickle.loads(sub_stdout))
+            except pickle.UnpicklingError as e:
+                with stdout_lock:
+                    print("Invalid output from game:")
+                    print("---OUTPUT---")
+                    print(sub_stdout)
+                    print(sub_stderr.decode('utf8'))
+                    print("------------")
 
-if tqdm is not None:
-    with stdout_lock:
-        pbar.close()
 
-with dataFile.open('w') as df:
-    writer = csv.DictWriter(df, fieldnames=['game', 'max', 'min', 'winner', 'max_tottime', 'min_tottime', 'move_count'])
-    writer.writeheader()
+    def go(self):
+        threads = []
+        for _ in range(self.play_count):
+            threads.append(threading.Thread(target=self.__run_subgame, args=(self.p1, self.p2)))
+        for _ in range(self.play_count):
+            threads.append(threading.Thread(target=self.__run_subgame, args=(self.p2, self.p1)))
 
-    for key in sorted(results):
-        writer.writerow(results[key])
+        for thread in threads:
+            thread.start()
 
-if tqdm is not None:
-    pbar.close()
+        for thread in threads:
+            thread.join()
+            if not self.__results.empty():
+                # If the subprocess doesn't finish (an exception occurs or the user interrupts
+                # the program), we don't have results to dequeue
+                self.update(self.__results.get())
+
+        assert self.__results.empty()
+
+class ParallelAllPlayerBattle(AllPlayerBattle):
+    def __init__(self, game_choice: str, write_to_csv=True, move_limit=300, play_count=5,
+            players=None, use_tqdm=True) -> None:
+        super().__init__(game_choice, write_to_csv=write_to_csv, move_limit=move_limit,
+            play_count=play_count, players=players, use_tqdm=use_tqdm)
+
+        self.__update_lock = threading.Lock()
+
+    def __update_res(self, res):
+        if self.use_tqdm:
+            with stdout_lock:
+                self.pbar.update()
+        if self.writer is not None:
+            with self.__update_lock:
+                self.writer.write_result(res)
+
+    def battle(self):
+        # Setup
+        game = self.game_class()
+        if self.writer is not None:
+            self.writer.open()
+        if self.use_tqdm and not self.pbar:
+            with stdout_lock:
+                self.pbar = tqdm.tqdm(total=(len(self.game_matchups) * 2 * self.play_count), desc='Simulating games')
+
+        threads = []
+
+        for p1, p2 in self.game_matchups:
+            new_battle = ParallelBattle(game, p1, p2, update=self.__update_res,
+                move_limit=self.move_limit, play_count=self.play_count)
+            threads.append(threading.Thread(target=new_battle.go))
+
+        for thread in threads:
+            thread.start()
+
+        try:
+            for thread in threads:
+                thread.join()
+        except InterruptedError:
+            print("Interrupted!")
+
+        if self.writer is not None:
+            self.writer.close()
+
+        if self.use_tqdm:
+            with stdout_lock:
+                self.pbar.close()
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("No game specified")
+        exit(1)
+
+    if TicTacToeGame is None and sys.argv[1] == "tic tac toe":
+        print("Tic tac toe requires numpy, install with <python3 -m pip install numpy>")
+        exit(1)
+
+    all_battles = ParallelAllPlayerBattle(sys.argv[1], use_tqdm=(tqdm is not None))
+
+    all_battles.battle()
