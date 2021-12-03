@@ -173,12 +173,15 @@ class AIBattle:
             self.update(result)
 
     def __play_game(self, maxPlayer, minPlayer):
-        game = self.game
+        return AIBattle._play_game(self.game, self.move_limit, maxPlayer, minPlayer)
+
+    @staticmethod
+    def _play_game(game, move_limit, maxPlayer, minPlayer):
         moveCount = 0
         max_tottime = min_tottime = 0
         while True:
             moveCount += 1
-            if moveCount == self.move_limit:
+            if moveCount == move_limit:
                 print("Hit move limit")
                 break
             if game.getWinner() is not None:
