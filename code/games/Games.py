@@ -9,6 +9,7 @@ import io
 class Game(ABC):
    _initialized = False
    def __init__(self):
+      self.__valid = not Game._initialized
       if Game._initialized:
          raise Exception("Only one game at a time is supported")
       self._boardStateSynched = False
@@ -59,6 +60,10 @@ class Game(ABC):
       """If the game is at a terminal state, returns the name of the winning player (either
       "min", "max", or "draw"). Otherwise, returns None."""
       pass
+
+   def __del__(self):
+      if self.__valid:
+         Game._initialized = False
 
 
 class CGame(Game):
