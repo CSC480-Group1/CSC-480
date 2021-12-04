@@ -44,7 +44,6 @@ def minimax_best_move(game: Game, eval, quiet=False, depth_limit=2) -> str:
         raise ValueError('Game is already over')
     
     vals = {}
-
     if not quiet and has_tqdm:
         moveitr = tqdm(moves, desc="Calculating minimax")
     else:

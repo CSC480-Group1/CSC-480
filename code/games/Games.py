@@ -568,3 +568,10 @@ class Connect4(Game):
    def getBoardKey(self):
       return str(self.game.board)
 
+   def getTurn(self):
+      return self.game.get_turn()
+
+   def getNextTurn(self):
+      curr_turn = self.game.get_turn()
+      return BLACK if curr_turn == WHITE else WHITE
+

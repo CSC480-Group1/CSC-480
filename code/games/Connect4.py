@@ -101,10 +101,10 @@ class Connect4Impl:
             return []
 
         valid_moves = list(filter(lambda col: self.insert(col, shadow=True), range(self.cols)))
-        for c in range(self.cols):
-            success = self.insert(c, shadow=True)
-        
         return valid_moves
+
+    def get_turn(self):
+        return self.turn
 
 
 if __name__ == '__main__':

@@ -189,6 +189,136 @@ def __check_win_connect4(game: Connect4, depth: int):
 def eval_connect4_1(game: Connect4, depth=1) -> int:
     return __check_win_connect4(game, depth)
 
+# https://www.scirp.org/html/1-9601415_90972.htm#f12
+# https://github.dev/Qtrain/Java/blob/master/src/unfinishedProjects/connectfour/Board.java
+evaluationTable = [
+    [3, 4, 5, 7, 5, 4, 3], 
+    [4, 6, 8, 10, 8, 6, 4],
+    [5, 8, 11, 13, 11, 8, 5], 
+    [5, 8, 11, 13, 11, 8, 5],
+    [4, 6, 8, 10, 8, 6, 4],
+    [3, 4, 5, 7, 5, 4, 3]
+]
+def eval_connect4_2(game: Connect4, depth=1) -> int:
+    utility = 138
+    if game.getWinner() is not None:
+        return utility * 2 if game.getWhoseMove() == 'BLACK' else -(utility * 2)
+    elif len(game.getValidMoves()) == 0:
+        return utility
+
+    max_rows, max_cols = game.getDimensions()
+    board = game.getBoardCopy()
+    sum = 0
+    for i in range(max_cols):
+        for j in range(max_rows):
+            if board[i][j] == BLACK:
+                sum += evaluationTable[j][i]
+            elif board[i][j] != NONE:
+                sum -= evaluationTable[j][i]
+    return utility + sum
+
+def max_length_from_pos(board, row, col):
+    max_length = 0
+    player = board[col][row]
+    curr_len = 1
+    num_rows = len(board[col])
+    num_cols = len(board)
+
+    # detect horizontal length
+    i = col - 1
+    while i >= 0 and board[i][row] == player:
+        i -= 1
+        curr_len += 1
+    i = col + 1
+    while i < num_cols and board[i][row] == player:
+        i += 1
+        curr_len += 1
+
+    max_length = curr_len
+    curr_len = 0
+
+    # detect vertical length
+    i = row - 1
+    while i >= 0 and board[col][i] == player:
+        i -= 1
+        curr_len += 1
+    i = row + 1
+    while i < num_rows and board[col][i] == player:
+        i += 1
+        curr_len += 1
+
+    max_length = max(curr_len, max_length)
+    curr_len = 0
+
+    # detect diagonal length
+    i = col - 1
+    j = row - 1
+    while i >= 0 and j >= 0 and board[i][j] == player:
+        i -= 1
+        j -= 1
+        curr_len += 1
+    i = col + 1
+    j = row + 1
+    while i < num_cols and j < num_rows and board[i][j] == player:
+        i += 1
+        j += 1
+        curr_len += 1
+
+    max_length = max(curr_len, max_length)
+    curr_len = 0
+
+    # detect negative diagonal length
+    i = col - 1
+    j = row + 1
+    while i >= 0 and j < num_rows and board[i][j] == player:
+        i -= 1
+        j += 1
+        curr_len += 1
+    i = col + 1
+    j = row - 1
+    while i < num_cols and j >= 0 and board[i][j] == player:
+        i += 1
+        j -= 1
+        curr_len += 1
+
+    max_length = max(curr_len, max_length)
+
+    return max_length
+
+def longest_chain(board, player):
+    longest = 0
+    for col in range(len(board)):
+        for row in range(len(board[0])):
+            if board[col][row] == player:
+                longest = max(longest, max_length_from_pos(board, row, col))
+    return longest
+
+# https://softwareengineering.stackexchange.com/questions/263514/why-does-this-evaluation-function-work-in-a-connect-four-game-in-java
+def eval_connect4_3(game: Connect4, depth=1) -> int:
+    utility = 138
+    if game.getWinner() is not None:
+        return utility * 2 if game.getWhoseMove() == 'BLACK' else -(utility * 2)
+    elif len(game.getValidMoves()) == 0:
+        return utility
+
+    max_rows, max_cols = game.getDimensions()
+    board = game.game.board
+    multiplier = -1 if game.getWhoseMove() == 'WHITE' else 1
+    score = longest_chain(board, game.getTurn()) * 10
+    score *= multiplier
+    # Prefer having your pieces in the center of the board.
+    # score boost
+    for col in range(max_cols):
+        for row in list(range(max_rows))[::-1]:
+            if board[col][row] == NONE:
+                continue
+            if board[col][row] == game.getTurn():
+                score -= (abs(3-col) * multiplier)
+            elif board[col][row] == game.getNextTurn():
+                score += (abs(3-col) * multiplier)
+
+    return score
+
 
 def eval_c4pop10_1(game: C4Pop10Game) -> int:
     redScore = game.getRedScore()
