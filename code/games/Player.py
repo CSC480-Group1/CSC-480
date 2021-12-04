@@ -43,6 +43,12 @@ class MinimaxPlayer(Player):
 
     def set_eval_func(self, eval_func):
         self._eval_func = eval_func
+
+    def get_depth_limit(self):
+        return self._depth_limit
+
+    def get_eval_func(self):
+        return self._eval_func
     
     def __str__(self):
         return "{}(eval_func={},depth_limit={})".format(self.__class__.__name__, self._eval_func.__name__, self._depth_limit)

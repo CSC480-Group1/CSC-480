@@ -73,11 +73,26 @@ class AllPlayerBattle:
     @staticmethod
     def get_default_players(game_class):
         default = {
-            CheckersGame: [MinimaxPlayer(eval_funcs.eval_checkers_1, 6), MonteCarloPlayer(num_iter=500, c=1.414)],
-            OthelloGame: [MinimaxPlayer(eval_funcs.eval_othello_1, 4), MonteCarloPlayer(num_iter=500, c=1.414)],
-            C4Pop10Game: [MinimaxPlayer(eval_funcs.eval_c4pop10_1, 6), MonteCarloPlayer(num_iter=500, c=1.414)],
-            TicTacToeGame: [MinimaxPlayer(eval_funcs.eval_tic_tac_toe_1, 9), MonteCarloPlayer(num_iter=500, c=1.414)],
-            Connect4: [MinimaxPlayer(eval_funcs.eval_connect4_1, 5), MonteCarloPlayer(num_iter=500, c=1.414)]
+            CheckersGame: [
+                MinimaxPlayer(eval_funcs.EvalFnGuide.get_default_fn_for_game(CheckersGame), 6),
+                MonteCarloPlayer(num_iter=500, c=1.414)
+            ],
+            OthelloGame: [
+                MinimaxPlayer(eval_funcs.EvalFnGuide.get_default_fn_for_game(OthelloGame), 4),
+                MonteCarloPlayer(num_iter=500, c=1.414)
+            ],
+            C4Pop10Game: [
+                MinimaxPlayer(eval_funcs.EvalFnGuide.get_default_fn_for_game(C4Pop10Game), 6),
+                MonteCarloPlayer(num_iter=500, c=1.414)
+            ],
+            TicTacToeGame: [
+                MinimaxPlayer(eval_funcs.EvalFnGuide.get_default_fn_for_game(TicTacToeGame), 9),
+                MonteCarloPlayer(num_iter=500, c=1.414)
+            ],
+            Connect4: [
+                MinimaxPlayer(eval_funcs.EvalFnGuide.get_default_fn_for_game(Connect4), 4),
+                MonteCarloPlayer(num_iter=500, c=1.414)
+            ]
         }
 
         for g in default:

@@ -1,3 +1,4 @@
+from typing import Type
 from Games import *
 import numpy as np
 from functools import reduce
@@ -376,3 +377,40 @@ def eval_random_rollout(game: Game) -> int:
             score -= 1
     assert key == game.getBoardKey()
     return score
+
+class EvalFnGuide:
+    eval_fns = {
+        OthelloGame: [eval_othello_1],
+        Connect4: [eval_connect4_1, eval_connect4_2, eval_connect4_3],
+        TicTacToeGame: [eval_tic_tac_toe_1],
+        C4Pop10Game: [eval_c4pop10_1],
+        CheckersGame: [eval_checkers_1]
+    }
+    all_eval_fns = [eval_f for eval_fn_l in eval_fns.values() for eval_f in eval_fn_l]
+
+    @staticmethod
+    def get_default_fn_for_game(game):
+        if game not in EvalFnGuide.eval_fns:
+            raise Exception("Invalid game")
+        
+        eval_fns = EvalFnGuide.eval_fns[game]
+        if len(eval_fns) == 1:
+            return eval_fns[0]
+
+        return {
+            Connect4: eval_connect4_3,
+        }[game]
+
+    @staticmethod
+    def get_eval_fn_from_str(game, eval_fn: str):
+        try:
+            relevant_fn = eval(eval_fn)
+        except NameError:
+            raise Exception(f'Given eval function {eval_fn} is not valid')
+
+        if relevant_fn not in EvalFnGuide.eval_fns[game]:
+            raise Exception('Invalid eval function for {}. Options: {}'.format(game,
+                ', '.join([f'"{e_fn}"' for e_fn in eval_fn[game]])
+            ))
+
+        return relevant_fn

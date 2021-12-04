@@ -1,4 +1,6 @@
 from Games import *
+from Player import MinimaxPlayer
+from ai_battle import AllPlayerBattle
 from eval_funcs import *
 from minimax import *
 
@@ -69,14 +71,14 @@ class InteractiveMinimaxGame:
                 print("Enter 'b' or 'w'")
 
     @staticmethod
-    def doPlayerPlay(game: Game, eval, depth_limit) -> None:
+    def doPlayerPlay(game: Game, eval_fn, depth_limit) -> None:
         moves = game.getValidMoves()
         if len(moves) == 0:
             return
         print("Possible moves:")
         for i, move in enumerate(moves):
             game.doMove(move)
-            val = minimax_val(game, eval, float('-inf'), float('inf'), depth_limit)
+            val = minimax_val(game, eval_fn, float('-inf'), float('inf'), depth_limit)
             game.undoMoves(1)
             print("  {}) {} ({})".format(i+1, move, val))
 
@@ -101,49 +103,85 @@ class InteractiveMinimaxGame:
         game.doMove(move)
 
     @staticmethod
-    def doMinimaxPlay(game: Game, eval, depth_limit) -> None:
-        move = minimax_best_move(game, eval, depth_limit=depth_limit)
+    def doMinimaxPlay(game: Game, eval_fn, depth_limit) -> None:
+        move = minimax_best_move(game, eval_fn, depth_limit=depth_limit)
         print("Minimax plays {}".format(move))
         game.doMove(move)
 
 
+def get_parsed_args(game_options):
+    parser = argparse.ArgumentParser(description='Run interactive minimax game as player or watch agents battle.')
+    parser.add_argument('--game', '-g', metavar='game', help="Which game. Options: {}".format(
+        ', '.join([f'"{game_str}"' for game_str in game_options])
+    ), required=True)
+    parser.add_argument('--depth-limit', '-d', metavar='depth', type=int, required=False, help="Game depth limit")
+    parser.add_argument('--eval-fn', '-e', metavar='fn_name', required=False, help="Evaluation function")
+
+    return parser.parse_args()
+
+def get_default_eval_fn_and_depth(game):
+    default_players = AllPlayerBattle.get_default_players(game_class=game)
+    default_minimax_player: MinimaxPlayer = next(filter(lambda p: isinstance(p, MinimaxPlayer), default_players), None)
+    if default_minimax_player is None:
+        raise Exception(f'No default players found for {game}')
+    
+    return default_minimax_player.get_eval_func(), default_minimax_player.get_depth_limit()
+
 if __name__ == "__main__":
-    game_options = ['Checkers', 'Othello', 'Basic Connect4', 'C4Pop10']
+    import sys
+    import argparse
+
+    game_options = ['Checkers', 'Othello', 'Connect4', 'C4Pop10']
     if TicTacToeGame is not None:
         game_options.append('Tic Tac Toe')
 
-    print("Game options:")
-    for i, opt in enumerate(game_options):
-        print(f"  {i+1}) {opt}")
+    game = None
+    depth_limit = None
+    eval_fn = None
 
+    if len(sys.argv) > 1:
+        parsed_args = get_parsed_args(game_options)
+        game = AllPlayerBattle.get_game_from_choice(parsed_args.game.lower())
+        defaults_for_game = get_default_eval_fn_and_depth(game)
+        if parsed_args.depth_limit:
+            depth_limit = parsed_args.depth_limit
+        else:
+            depth_limit = defaults_for_game[1]
+        if parsed_args.eval_fn:
+            eval_fn = EvalFnGuide.get_eval_fn_from_str(game, parsed_args.eval_fn)
+        else:
+            eval_fn = defaults_for_game[0]
+    else:
+        print("Game options:")
+        for i, opt in enumerate(game_options):
+            print(f"  {i+1}) {opt}")
 
-    while True:
-        response = input('> ')
-        if response == '1':
-            depth_limit = 6
-            game = CheckersGame()
-            eval = GameEvalFuncs(eval_checkers_1)
-            break
-        elif response == '2':
-            depth_limit = 4
-            game = OthelloGame()
-            eval = GameEvalFuncs(eval_othello_1)
-            break
-        elif response == '3':
-            depth_limit = 4
-            game = Connect4()
-            eval = GameEvalFuncs(eval_connect4_3)
-            break
-        elif response == '3':
-            depth_limit = 6
-            game = C4Pop10Game()
-            eval = eval_c4pop10_1
-            break
-        elif TicTacToeGame is not None and response == '5':
-            depth_limit = 9
-            game = TicTacToeGame()
-            eval = eval_tic_tac_toe_1
-            break
-        print("Choices are " + ', '.join([f"'{i+1}'" for i in range(len(game_options))]))
+        while True:
+            response = input('> ')
+            if response == '1':
+                game = CheckersGame
+                break
+            elif response == '2':
+                game = OthelloGame
+                break
+            elif response == '3':
+                game = Connect4
+                break
+            elif response == '3':
+                game = C4Pop10Game
+                break
+            elif TicTacToeGame is not None and response == '5':
+                game = TicTacToeGame
+                break
+            print("Choices are " + ', '.join([f"'{i+1}'" for i in range(len(game_options))]))
 
-    InteractiveMinimaxGame(game, eval_fn=eval, depth_limit=depth_limit).play()
+        eval_fn, depth_limit = get_default_eval_fn_and_depth(game)
+
+    assert game is not None
+    assert eval_fn is not None
+    assert depth_limit is not None
+
+    print(f'\nPlaying {game} with eval_fn {eval_fn} and depth limit {depth_limit}\n')
+
+    game = game()
+    InteractiveMinimaxGame(game, eval_fn=eval_fn, depth_limit=depth_limit).play()
