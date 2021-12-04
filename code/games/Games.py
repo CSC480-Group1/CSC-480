@@ -431,28 +431,6 @@ class Connect4(Game):
       except ValueError:
          print('Please provide a valid column NUMBER')
 
-   def doMove_PRINT(self, column):
-      try:
-         int_col = int(column)
-         print('Before insertion')
-         for game_state in self.game_states:
-            print(Connect4Impl.getRepr(game_state, self.game.rows, self.game.cols))
-         print('Done before insertion')
-         success = self.game.insert(int_col)
-         if success:
-            print('Adding game state')
-            for game_state in self.game_states:
-               print(Connect4Impl.getRepr(game_state, self.game.rows, self.game.cols))
-            print('Done P1')
-            self.game.printBoard()
-            self.game_states.append(self.getBoardCopy())
-            for game_state in self.game_states:
-               print(Connect4Impl.getRepr(game_state, self.game.rows, self.game.cols))
-            print('Done P2')
-            self.history.append(int_col)
-      except ValueError:
-         print('Please provide a valid column NUMBER')
-
    def applyMove(self):
       self.doMove(self.saved_column)
 
@@ -505,15 +483,8 @@ class Connect4(Game):
                else:
                   new_history.append(col)
                   turn = WHITE if turn == BLACK else BLACK
-            
-         # print()
-      print('first load')
-      self.loadBoardState(new_history)
-      self.printBoard()
 
-      print(turn)
-      print(b_q)
-      print(w_q)
+      self.loadBoardState(new_history)
 
       while len(b_q) > 0 or len(w_q) > 0:
          if turn == WHITE:
@@ -522,11 +493,7 @@ class Connect4(Game):
             new_history.append(b_q.pop(0))
          turn = WHITE if turn == BLACK else BLACK
 
-      print(new_history)
       self.loadBoardState(new_history)
-      # self.game.board = board
-      # self.game_states = [self.getBoardCopy()]
-      # self.game.turn = turn
 
    def undoMoves(self, movesToUndo):
       # Can't go past first board state
@@ -536,31 +503,6 @@ class Connect4(Game):
       self.game.turn = BLACK if (goBackTo - 1) % 2 == 0 else WHITE
       self.history = self.history[:goBackTo - 1]
       self.game.game_over = self.game.checkForWin()
-
-   def undoMoves_PRINT(self, movesToUndo):
-      # Can't go past first board state
-      print('Current game board')
-      self.printBoard()
-      print('\n ============  BEFIRE GAME STATES  =========== \n')
-      for game_state in self.game_states:
-         print(Connect4Impl.getRepr(game_state, self.game.rows, self.game.cols))
-      print('\n ============  END  =========== \n')
-      goBackTo = max(1, 1 + len(self.history) - movesToUndo)
-      print(goBackTo)
-      print(self.history)
-      self.game_states = self.game_states[:goBackTo]
-      print('\n ============  AFTER GAME STATES  =========== \n')
-      for game_state in self.game_states:
-         print(Connect4Impl.getRepr(game_state, self.game.rows, self.game.cols))
-      print('\n ============  END  =========== \n')
-      self.game.board = copy.deepcopy(self.game_states[-1])
-      self.game.turn = BLACK if (goBackTo - 1) % 2 == 0 else WHITE
-      print(self.game.turn)
-      self.history = self.history[:goBackTo - 1]
-      print(self.history)
-      self.game.game_over = self.game.checkForWin()
-      print('New game board')
-      self.printBoard()
 
    def getMoveHist(self):
       return copy.deepcopy(self.history)
