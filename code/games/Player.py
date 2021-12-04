@@ -24,6 +24,12 @@ class MonteCarloPlayer(Player):
 
     def set_c(self, c):
         self._c = c
+
+    def get_c(self):
+        return self._c
+    
+    def get_num_iters(self):
+        return self._num_iter
     
     def __str__(self):
         return "{}(num_iter={},c={})".format(self.__class__.__name__, self._num_iter, self._c)
@@ -49,7 +55,7 @@ class MinimaxPlayer(Player):
 
     def get_eval_func(self):
         return self._eval_func
-    
+
     def __str__(self):
         return "{}(eval_func={},depth_limit={})".format(self.__class__.__name__, self._eval_func.__name__, self._depth_limit)
 

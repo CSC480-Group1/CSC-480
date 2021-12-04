@@ -7,17 +7,17 @@ try:
 except ModuleNotFoundError:
     has_tqdm = False
 
-def minimax_val(game: Game, eval, alpha: float, beta: float, depthLimit: int) -> int:
+def minimax_val(game: Game, eval_fn, alpha: float, beta: float, depthLimit: int) -> int:
     key = game.getBoardKey()
     moves = game.getValidMoves()
     if depthLimit == 0 or len(moves) == 0:
-        return eval(game)
+        return eval_fn(game)
     
     if game.getPlayer() == 'max':
         max_value = float('-inf')
         for move in moves:
             game.doMove(move)
-            successor_value = minimax_val(game, eval, alpha, beta, depthLimit-1)
+            successor_value = minimax_val(game, eval_fn, alpha, beta, depthLimit-1)
             game.undoMoves(1)
 
             max_value = max(max_value, successor_value)
@@ -29,7 +29,7 @@ def minimax_val(game: Game, eval, alpha: float, beta: float, depthLimit: int) ->
         min_value = float('inf')
         for move in moves:
             game.doMove(move)
-            successor_value = minimax_val(game, eval, alpha, beta, depthLimit-1)
+            successor_value = minimax_val(game, eval_fn, alpha, beta, depthLimit-1)
             game.undoMoves(1)
 
             min_value = min(min_value, successor_value)
@@ -38,7 +38,7 @@ def minimax_val(game: Game, eval, alpha: float, beta: float, depthLimit: int) ->
             beta = min(beta, successor_value)
         return min_value
 
-def minimax_best_move(game: Game, eval, quiet=False, depth_limit=2) -> str:
+def minimax_best_move(game: Game, eval_fn, quiet=False, depth_limit=2) -> str:
     moves = game.getValidMoves()
     if len(moves) == 0:
         raise ValueError('Game is already over')
@@ -50,7 +50,7 @@ def minimax_best_move(game: Game, eval, quiet=False, depth_limit=2) -> str:
         moveitr = moves
     for move in moveitr:
         game.doMove(move)
-        val = minimax_val(game, eval, float('-inf'), float('inf'), depth_limit)
+        val = minimax_val(game, eval_fn, float('-inf'), float('inf'), depth_limit)
         game.undoMoves(1)
         vals[move] = val
 

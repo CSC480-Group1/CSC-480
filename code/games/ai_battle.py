@@ -72,7 +72,7 @@ class AllPlayerBattle:
 
     @staticmethod
     def get_default_players(game_class):
-        default = {
+        defaults = {
             CheckersGame: [
                 MinimaxPlayer(eval_funcs.EvalFnGuide.get_default_fn_for_game(CheckersGame), 6),
                 MonteCarloPlayer(num_iter=500, c=1.414)
@@ -95,10 +95,10 @@ class AllPlayerBattle:
             ]
         }
 
-        for g in default:
-            default[g].append(RandomPlayer())
+        for g in defaults:
+            defaults[g].append(RandomPlayer())
 
-        return default[game_class]
+        return defaults[game_class]
 
     @staticmethod
     def generate_player_matchups(players):
