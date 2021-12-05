@@ -60,10 +60,18 @@ class Game(ABC):
       """If the game is at a terminal state, returns the name of the winning player (either
       "min", "max", or "draw"). Otherwise, returns None."""
       pass
+   
+   @staticmethod
+   def check_game_valid(func):
+      def validity_fn(self, *args):
+         if not self.__valid:
+            raise Exception(f'Game {self} has been closed/deleted!')
+         return func(self, *args)
+      return validity_fn
 
    def close(self):
       self.__valid = False
-      Game._initialized = True
+      Game._initialized = False
 
    def __del__(self):
       self.close()
@@ -74,18 +82,22 @@ class CGame(Game):
       super().__init__()
       BoardTest.init(gamestr)
 
+   @Game.check_game_valid
    def enterMove(move: str):
       """ Load a move as the 'current' move, ready to be executed. """
       BoardTest.enterMove(move)
 
+   @Game.check_game_valid
    def applyMove():
       """ Execute the currently loaded move. """
       BoardTest.applyMove()
 
+   @Game.check_game_valid
    def getCurrMove(self):
       """ Get the currently loaded move"""
       return BoardTest.getCurrMove()
 
+   @Game.check_game_valid
    def doMove(self, move: str):
       """ Load and execute a move. Shorthand for enterMove() followed by
       applyMove(). """
@@ -93,33 +105,40 @@ class CGame(Game):
       BoardTest.enterMove(move)
       BoardTest.applyMove()
 
+   @Game.check_game_valid
    def saveBoardState(self):
       """ Get the current board state as a binary blob. This can be later used
       by loadBoardState() to restore the board state. """
       return BoardTest.saveBoardState()
 
+   @Game.check_game_valid
    def loadBoardState(self, boardState: bytes):
       """ Restore a board state saved by saveBoardState(). """
       self._boardStateSynched = False
       BoardTest.loadBoardState(boardState)
 
+   @Game.check_game_valid
    def undoMoves(self, moveCount: int):
       self._boardStateSynched = False
       BoardTest.undoMoves(moveCount)
 
+   @Game.check_game_valid
    def getBoardKey(self):
       """ Get a compressed binary representation of the current board suitable
       for use in a hash table. Intended for use with a transposition table in
       minimax """
       return BoardTest.getBoardKey()
 
+   @Game.check_game_valid
    def showBoard(self):
       return BoardTest.showBoard()
 
+   @Game.check_game_valid
    def _verifyStateSync(self):
       if not self._boardStateSynched:
          self._syncBoardState()
 
+   @Game.check_game_valid
    def _syncBoardState(self):
       if self._boardStateSynched:
          return
@@ -131,10 +150,12 @@ class CGame(Game):
    def _parseBoardState(self, binData):
       pass
 
+   @Game.check_game_valid
    def getValidMoves(self):
       self._verifyStateSync()
       return self._moves
 
+   @Game.check_game_valid
    def getMoveHist(self):
       return BoardTest.getMoveHist()
 
@@ -143,6 +164,7 @@ class CheckersGame(CGame):
    def __init__(self):
       super().__init__("CheckersBoard")
 
+   @Game.check_game_valid
    def _parseBoardState(self, binData):
       with io.BytesIO(binData) as strm:
 
@@ -156,6 +178,7 @@ class CheckersGame(CGame):
             self._board.append(rowArr)
          self._move = struct.unpack('B', strm.read(1))[0]
 
+   @Game.check_game_valid
    def getWhoseMove(self):
       self._verifyStateSync()
       if self._move == 0:
@@ -163,12 +186,14 @@ class CheckersGame(CGame):
       else:
          return "WHITE"
 
+   @Game.check_game_valid
    def getDim(self):
       """ Get the dimensions of the chess board. The board will have size
       getDim() x getDim(). """
       self._verifyStateSync()
       return self._dim
 
+   @Game.check_game_valid
    def getPieceAtPos(self, row, col):
       """ Get the value of a piece at a certain board position. (0, 0) is in the
       upper-left corner. A dot (.) indicates no piece. A letter ("w" or "b")
@@ -194,12 +219,14 @@ class CheckersGame(CGame):
 
       return pieceStr
 
+   @Game.check_game_valid
    def getPlayer(self):
       if self.getWhoseMove() == 'BLACK':
          return 'max'
       else:
          return 'min'
 
+   @Game.check_game_valid
    def getWinner(self):
       if len(self.getValidMoves()) != 0:
          return None
@@ -213,6 +240,7 @@ class OthelloGame(CGame):
    def __init__(self):
       super().__init__("OthelloBoard")
 
+   @Game.check_game_valid
    def _parseBoardState(self, binData):
       with io.BytesIO(binData) as strm:
          dim = struct.unpack('B', strm.read(1))[0]
@@ -225,6 +253,7 @@ class OthelloGame(CGame):
             self._board.append(rowArr)
          self._move = struct.unpack('B', strm.read(1))[0]
 
+   @Game.check_game_valid
    def getWhoseMove(self):
       self._verifyStateSync()
       if self._move == 0:
@@ -232,12 +261,14 @@ class OthelloGame(CGame):
       else:
          return "WHITE"
 
+   @Game.check_game_valid
    def getDim(self):
       """ Get the dimensions of the chess board. The board will have size
       getDim() x getDim(). """
       self._verifyStateSync()
       return self._dim
 
+   @Game.check_game_valid
    def getPieceAtPos(self, row, col):
       """ Get the value of a piece at a certain board position. (0, 0) is in the
       upper-left corner. A dot (.) indicates no piece. A letter ("W" or "B")
@@ -257,12 +288,14 @@ class OthelloGame(CGame):
       else:
          raise ValueError("Unknown Othello board value (0x{:0X})".format(piece))
 
+   @Game.check_game_valid
    def getPlayer(self):
       if self.getWhoseMove() == 'BLACK':
          return 'max'
       else:
          return 'min'
 
+   @Game.check_game_valid
    def getWinner(self):
       if len(self.getValidMoves()) != 0:
          return None
@@ -298,6 +331,7 @@ class C4Pop10Game(CGame):
    def __init__(self):
       super().__init__("C4Pop10Board")
 
+   @Game.check_game_valid
    def _parseBoardState(self, binData):
       byte = struct.iter_unpack('b', binData)
       byte = map(lambda b: b[0], byte)
@@ -324,6 +358,7 @@ class C4Pop10Game(CGame):
       self._yellowScore.threatDisks = next(byte)
       self._yellowScore.keptDisks = next(byte)
 
+   @Game.check_game_valid
    def getWhoseMove(self):
       self._verifyStateSync()
       if self._move == 0:
@@ -331,12 +366,14 @@ class C4Pop10Game(CGame):
       else:
          return "BLACK"
 
+   @Game.check_game_valid
    def getBoardDimensions(self):
       """ Get the dimensions of the checkers board. The return value is a
       tuple of (width, height)."""
       self._verifyStateSync()
       return (self._width, self._height)
 
+   @Game.check_game_valid
    def getPieceAtPos(self, row, col):
       """Get the value of a piece at a certain board position. (0, 0) is in the
       upper-left corner. A dot (.) indicates no piece. A letter ("R" or "Y")
@@ -355,22 +392,26 @@ class C4Pop10Game(CGame):
       else:
          return "."
 
+   @Game.check_game_valid
    def getRedScore(self):
       """Gets the score of the red player. Returns a C4Pop10GameScore object."""
       self._verifyStateSync()
       return self._redScore
 
+   @Game.check_game_valid
    def getYellowScore(self):
       """Gets the score of the yellow player. Returns a C4Pop10GameScore object."""
       self._verifyStateSync()
       return self._yellowScore
 
+   @Game.check_game_valid
    def getPlayer(self):
       if self.getWhoseMove() == 'WHITE':
          return 'max'
       else:
          return 'min'
 
+   @Game.check_game_valid
    def getWinner(self):
       if len(self.getValidMoves()) != 0:
          return None
@@ -394,29 +435,36 @@ class Connect4(Game):
       self.saved_column = None
       self.history = []
 
+   @Game.check_game_valid
    def resetGame(self):
       self.game.reset_game()
       self.game_states = [self.getBoardCopy()]
       self.history = []
 
+   @Game.check_game_valid
    def printBoard(self):
       return self.game.printBoard()
 
+   @Game.check_game_valid
    def showBoard(self):
       return self.game.getBoardRepr()
 
+   @Game.check_game_valid
    def getBoardCopy(self):
       return copy.deepcopy(self.game.board)
 
+   @Game.check_game_valid
    def getWhoseMove(self):
       return self.game.getWhoseMove()
 
+   @Game.check_game_valid
    def getPlayer(self):
       if self.getWhoseMove() == 'BLACK':
          return 'max'
       else:
          return 'min'
 
+   @Game.check_game_valid
    def getWinner(self):
       if len(self.getValidMoves()) != 0:
          return None
@@ -425,9 +473,11 @@ class Connect4(Game):
          return "max"
       return "min"
 
+   @Game.check_game_valid
    def getDimensions(self):
       return (self.game.rows, self.game.cols)
 
+   @Game.check_game_valid
    def doMove(self, column):
       try:
          int_col = int(column)
@@ -438,30 +488,38 @@ class Connect4(Game):
       except ValueError:
          print('Please provide a valid column NUMBER')
 
+   @Game.check_game_valid
    def applyMove(self):
       self.doMove(self.saved_column)
 
+   @Game.check_game_valid
    def enterMove(self, move):
       self.saved_column = move
 
+   @Game.check_game_valid
    def getCurrMove(self):
       return self.saved_column
 
+   @Game.check_game_valid
    def getValidMoves(self):
       return self.game.getValidMoves()
 
+   @Game.check_game_valid
    def getPieceAtPos(self, row, col):
       return self.game.board[row][col]
 
+   @Game.check_game_valid
    def saveBoardState(self):
       return copy.deepcopy(self.history)
 
+   @Game.check_game_valid
    def loadBoardState(self, boardHistory):
       self.resetGame()
       for val in boardHistory:
          self.doMove(val)
       self.printBoard()
 
+   @Game.check_game_valid
    def loadBoard(self, board, board_vals_not_none):
       self.resetGame()
       generic_board = self.getBoardCopy()
@@ -502,6 +560,7 @@ class Connect4(Game):
 
       self.loadBoardState(new_history)
 
+   @Game.check_game_valid
    def undoMoves(self, movesToUndo):
       # Can't go past first board state
       goBackTo = max(1, 1 + len(self.history) - movesToUndo)
@@ -511,16 +570,26 @@ class Connect4(Game):
       self.history = self.history[:goBackTo - 1]
       self.game.game_over = self.game.checkForWin()
 
+   @Game.check_game_valid
    def getMoveHist(self):
       return copy.deepcopy(self.history)
-
+   
+   @Game.check_game_valid
    def getBoardKey(self):
       return str(self.game.board)
 
+   @Game.check_game_valid
    def getTurn(self):
       return self.game.get_turn()
 
+   @Game.check_game_valid
    def getNextTurn(self):
       curr_turn = self.game.get_turn()
       return BLACK if curr_turn == WHITE else WHITE
 
+
+try:
+   from tictactoe import TicTacToeGame
+   TicTacToeGame = TicTacToeGame
+except ModuleNotFoundError:
+   TicTacToeGame = None

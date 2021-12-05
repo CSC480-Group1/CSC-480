@@ -25,6 +25,7 @@ class TicTacToeGame(Game):
         self._move_hist = []
         self._curr_player = 'max'
 
+    @Game.check_game_valid
     def doMove(self, move: str):
         move = int(move) - 1
         assert not move in self._move_hist
@@ -33,6 +34,7 @@ class TicTacToeGame(Game):
         self._curr_player = _next_player(self._curr_player)
         self._move_hist.append(move)
 
+    @Game.check_game_valid
     def undoMoves(self, movecount: int):
         for _ in range(min(movecount, len(self._move_hist))):
             move = self._move_hist[-1]
@@ -41,9 +43,11 @@ class TicTacToeGame(Game):
             assert self._board.flat[move] == self._get_player_letter()
             self._board.flat[move] = ' '
 
+    @Game.check_game_valid
     def getBoardKey(self):
         return ''.join(self._board.flat)
 
+    @Game.check_game_valid
     def showBoard(self):
         out = ""
         for row in self._board:
@@ -53,6 +57,7 @@ class TicTacToeGame(Game):
         out += "{}'s turn".format(self._get_player_letter())
         return out
 
+    @Game.check_game_valid
     def getValidMoves(self):
         if self.getWinner() is not None:
             return []
@@ -62,12 +67,15 @@ class TicTacToeGame(Game):
                 moves += str(i+1)
         return moves
 
+    @Game.check_game_valid
     def getMoveHist(self):
         return [str(move + 1) for move in self._move_hist]
 
+    @Game.check_game_valid
     def getPlayer(self):
         return self._curr_player
 
+    @Game.check_game_valid
     def getWinner(self):
         if np.any(np.all(self._board == 'X', axis=0)) or \
             np.any(np.all(self._board == 'X', axis=1)) or \
