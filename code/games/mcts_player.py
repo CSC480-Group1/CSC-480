@@ -36,7 +36,7 @@ class InteractiveMCTSGame(InteractiveAgent):
         if winner == 'draw':
             print('Draw!')
         else:
-            print("{} wins!".format())
+            print("{} wins!".format(winner))
 
 class InteractiveMCTSGameRunner(InteractiveGameRunner):
     def __init__(self) -> None:
