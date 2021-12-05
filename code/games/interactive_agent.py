@@ -49,7 +49,7 @@ class InteractiveAgent(ABC):
         play_fn()
 
     def run_game(self):
-        if self.user_playing_as == "b":
+        if self.user_playing_as == "max":
             self.try_play(self.doPlayerPlay)
 
         curr_play = self.do_ai_agent_move
@@ -67,13 +67,14 @@ class InteractiveAgent(ABC):
 
     @staticmethod
     def get_who_user_will_play():
-        print("Play as black or white? (n for no player)")
+        print("Play as max or min? (n for no player)")
+        options = ["max", "min", "n"]
         while True:
-            response = input('(b/w/n)> ')
-            if response in ["w", "b", "n"]:
+            response = input(f"({'/'.join(options)})> ")
+            if response in options:
                 return response
             else:
-                print("Enter 'b' or 'w'")
+                print(f"Enter {' or '.join(options)}")
 
     def doPlayerPlay(self) -> None:
         game = self.game
@@ -85,12 +86,12 @@ class InteractiveAgent(ABC):
             self.on_possible_player_move(i, move)
 
         move = ""
-        
+
         while True:
             choice = input('> ')
             try:
                 if choice == 'q':
-                    exit(0)
+                    raise Exception("Stop game")
                 choice = int(choice)
                 if choice > 0 and choice <= len(moves):
                     move = moves[choice-1]
@@ -107,7 +108,7 @@ class InteractivePlayerHelper:
         game_options = ['Checkers', 'Othello', 'Connect4', 'C4Pop10']
         if TicTacToeGame is not None:
             game_options.append('Tic Tac Toe')
-        
+
         return game_options
 
     @staticmethod
@@ -144,7 +145,7 @@ class InteractivePlayerHelper:
         default_player = next(filter(lambda p: isinstance(p, PlayerType), default_players), None)
         if default_player is None:
             raise Exception(f'No default players found for {game_class}')
-        
+
         return default_player
 
 class InteractiveGameRunner(ABC):
@@ -164,7 +165,7 @@ class InteractiveGameRunner(ABC):
     @abstractmethod
     def get_interactive_game_str(self):
         pass
-    
+
     @staticmethod
     @abstractmethod
     def get_interactive_game() -> Type[InteractiveAgent]:
