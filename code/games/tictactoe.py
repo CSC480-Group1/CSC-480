@@ -11,7 +11,6 @@ def _next_player(player: str) -> str:
         raise ValueError('Unknown Player "{}"'.format(player))
 
 class TicTacToeGame(Game):
-
     def _get_player_letter(self):
         if self._curr_player == 'max':
             return 'X'
@@ -21,6 +20,7 @@ class TicTacToeGame(Game):
             raise ValueError('Unknown player "{}"'.format(self._curr_player))
 
     def __init__(self):
+        super().__init__()
         self._board = np.full( (3, 3), ' ')
         self._move_hist = []
         self._curr_player = 'max'

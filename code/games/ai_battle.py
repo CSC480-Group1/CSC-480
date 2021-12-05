@@ -1,3 +1,4 @@
+from typing import Type
 from Player import MinimaxPlayer, MonteCarloPlayer, Player, RandomPlayer
 import eval_funcs
 from Games import *
@@ -30,7 +31,7 @@ class InvalidGameException(Exception):
         super().__init__(*args)
 
 class AllPlayerBattle:
-    def __init__(self, game_choice: str, write_to_csv=True, move_limit=300, play_count=5,
+    def __init__(self, game_choice, write_to_csv=True, move_limit=300, play_count=5,
             players=None, use_tqdm=True) -> None:
         if use_tqdm and not has_tqdm:
             raise NoTQDMException('TQDM is not installed: <python3 -m pip install tqdm>')
@@ -42,19 +43,32 @@ class AllPlayerBattle:
         self.writer = None
         self.pbar = None
         self.game_choice = game_choice
-        self.game_class = AllPlayerBattle.get_game_from_choice(self.game_choice)
+        self.game = None
+        self.game_class = AllPlayerBattle.parse_game_type(game_choice)
+        if isinstance(game_choice, Game):
+            self.game = game_choice
 
         self.players = players
         if self.players is None:
             self.players = AllPlayerBattle.get_default_players(self.game_class)
 
         assert len(self.players) > 1
-        self.game = None
 
         self.game_matchups = AllPlayerBattle.generate_player_matchups(self.players)
 
         if self.write_to_csv:
-            self.writer = CSVGameWrite(self.game_choice)
+            self.writer = CSVGameWrite(self.game_class.__name__)
+
+    @staticmethod
+    def parse_game_type(game_choice):
+        if isinstance(game_choice, str):
+            return AllPlayerBattle.get_game_from_choice(game_choice)
+        elif isinstance(game_choice, Game):
+            return type(game_choice)
+        elif game_choice in AllPlayerBattle.get_game_choice_map().values():
+            return game_choice
+
+        raise Exception(f'Invalid type for game_choice: {type(game_choice)}')
 
     @staticmethod
     def get_game_choice_map():
@@ -121,10 +135,17 @@ class AllPlayerBattle:
             self.pbar.update()
         if self.writer is not None:
             self.writer.write_result(res)
+        else:
+            print(res)
+
+    def get_game_class(self):
+        return self.game_class
 
     def battle(self):
         # Setup
-        game = self.game_class()
+        if self.game is None:
+            self.game = self.game_class()
+        game = self.game
         if self.writer is not None:
             self.writer.open()
         if self.use_tqdm and not self.pbar:
@@ -143,11 +164,11 @@ class AllPlayerBattle:
             self.pbar.close()
 
 class MinimaxMonteCarloRandomPlayerBattle(AllPlayerBattle):
-    def __init__(self, game_choice: str,
+    def __init__(self, game_choice,
             minimax_depth=None, minimax_eval_fn=None,
             monte_carlo_c=None, monte_carlo_iters=None,
             **kwargs) -> None:
-        game_c = AllPlayerBattle.get_game_from_choice(game_choice)
+        game_c = AllPlayerBattle.parse_game_type(game_choice)
         default_players = AllPlayerBattle.get_default_players(game_c)
 
         minimax_player: MinimaxPlayer = next(filter(lambda p: isinstance(p, MinimaxPlayer), default_players), None)
