@@ -60,7 +60,7 @@ class Game(ABC):
       """If the game is at a terminal state, returns the name of the winning player (either
       "min", "max", or "draw"). Otherwise, returns None."""
       pass
-   
+
    @staticmethod
    def check_game_valid(func):
       def validity_fn(self, *args):
@@ -70,8 +70,9 @@ class Game(ABC):
       return validity_fn
 
    def close(self):
-      self.__valid = False
-      Game._initialized = False
+      if self.__valid:
+         self.__valid = False
+         Game._initialized = False
 
    def __del__(self):
       self.close()
@@ -573,7 +574,7 @@ class Connect4(Game):
    @Game.check_game_valid
    def getMoveHist(self):
       return copy.deepcopy(self.history)
-   
+
    @Game.check_game_valid
    def getBoardKey(self):
       return str(self.game.board)
