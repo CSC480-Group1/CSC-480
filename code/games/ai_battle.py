@@ -1,4 +1,3 @@
-from typing import Type
 from Player import MinimaxPlayer, MonteCarloPlayer, Player, RandomPlayer
 import eval_funcs
 from Games import *
@@ -151,9 +150,14 @@ class AllPlayerBattle:
         if self.use_tqdm and not self.pbar:
             self.pbar = tqdm.tqdm(total=(len(self.game_matchups) * 2 * self.play_count), desc='Simulating games')
 
+        results = []
+        def add_results_and_update(res):
+            results.append(res)
+            self.__update_res(res)
+
         print("Playing", game.__class__.__name__)
         for p1, p2 in self.game_matchups:
-            new_battle = AIBattle(game, p1, p2, update=self.__update_res,
+            new_battle = AIBattle(game, p1, p2, update=add_results_and_update,
                 move_limit=self.move_limit, play_count=self.play_count)
             new_battle.go()
 
@@ -162,6 +166,8 @@ class AllPlayerBattle:
 
         if self.use_tqdm:
             self.pbar.close()
+
+        return results
 
 class MinimaxMonteCarloRandomPlayerBattle(AllPlayerBattle):
     def __init__(self, game_choice,
