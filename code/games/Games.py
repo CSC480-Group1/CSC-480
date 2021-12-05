@@ -22,7 +22,7 @@ class Game(ABC):
 
    @abstractmethod
    def undoMoves(self, movecount: int):
-      """ Undo moveCount moves. If moveCount is greater than the number of 
+      """ Undo moveCount moves. If moveCount is greater than the number of
       moves that have been executed, the board will be reset to its initial
       state. """
       pass
@@ -61,9 +61,12 @@ class Game(ABC):
       "min", "max", or "draw"). Otherwise, returns None."""
       pass
 
+   def close(self):
+      self.__valid = False
+      Game._initialized = True
+
    def __del__(self):
-      if self.__valid:
-         Game._initialized = False
+      self.close()
 
 
 class CGame(Game):
@@ -94,7 +97,7 @@ class CGame(Game):
       """ Get the current board state as a binary blob. This can be later used
       by loadBoardState() to restore the board state. """
       return BoardTest.saveBoardState()
-   
+
    def loadBoardState(self, boardState: bytes):
       """ Restore a board state saved by saveBoardState(). """
       self._boardStateSynched = False
@@ -116,7 +119,7 @@ class CGame(Game):
    def _verifyStateSync(self):
       if not self._boardStateSynched:
          self._syncBoardState()
-   
+
    def _syncBoardState(self):
       if self._boardStateSynched:
          return
@@ -131,7 +134,7 @@ class CGame(Game):
    def getValidMoves(self):
       self._verifyStateSync()
       return self._moves
-   
+
    def getMoveHist(self):
       return BoardTest.getMoveHist()
 
@@ -165,7 +168,7 @@ class CheckersGame(CGame):
       getDim() x getDim(). """
       self._verifyStateSync()
       return self._dim
-   
+
    def getPieceAtPos(self, row, col):
       """ Get the value of a piece at a certain board position. (0, 0) is in the
       upper-left corner. A dot (.) indicates no piece. A letter ("w" or "b")
@@ -185,12 +188,12 @@ class CheckersGame(CGame):
             pieceStr = 'b'
       else:
          pieceStr = '.'
-      
+
       if piece & 0x04 != 0:
          pieceStr = pieceStr.upper()
-      
+
       return pieceStr
-      
+
    def getPlayer(self):
       if self.getWhoseMove() == 'BLACK':
          return 'max'
@@ -200,7 +203,7 @@ class CheckersGame(CGame):
    def getWinner(self):
       if len(self.getValidMoves()) != 0:
          return None
-      
+
       if self.getPlayer() == "max":
          return "min"
       else:
@@ -234,7 +237,7 @@ class OthelloGame(CGame):
       getDim() x getDim(). """
       self._verifyStateSync()
       return self._dim
-   
+
    def getPieceAtPos(self, row, col):
       """ Get the value of a piece at a certain board position. (0, 0) is in the
       upper-left corner. A dot (.) indicates no piece. A letter ("W" or "B")
@@ -263,7 +266,7 @@ class OthelloGame(CGame):
    def getWinner(self):
       if len(self.getValidMoves()) != 0:
          return None
-      
+
       black_count = white_count = 0
       for row in range(self.getDim()):
          for col in range(self.getDim()):
@@ -327,13 +330,13 @@ class C4Pop10Game(CGame):
          return "WHITE"
       else:
          return "BLACK"
-   
+
    def getBoardDimensions(self):
       """ Get the dimensions of the checkers board. The return value is a
       tuple of (width, height)."""
       self._verifyStateSync()
       return (self._width, self._height)
-   
+
    def getPieceAtPos(self, row, col):
       """Get the value of a piece at a certain board position. (0, 0) is in the
       upper-left corner. A dot (.) indicates no piece. A letter ("R" or "Y")
@@ -361,7 +364,7 @@ class C4Pop10Game(CGame):
       """Gets the score of the yellow player. Returns a C4Pop10GameScore object."""
       self._verifyStateSync()
       return self._yellowScore
-   
+
    def getPlayer(self):
       if self.getWhoseMove() == 'WHITE':
          return 'max'
@@ -371,7 +374,7 @@ class C4Pop10Game(CGame):
    def getWinner(self):
       if len(self.getValidMoves()) != 0:
          return None
-      
+
       yellow_score = self.getYellowScore()
       red_score = self.getRedScore()
 
