@@ -413,10 +413,9 @@ class Connect4(Game):
       if len(self.getValidMoves()) != 0:
          return None
 
-      if self.getPlayer() == "max":
-         return "min"
-      else:
+      if self.game.getWinner() == BLACK:
          return "max"
+      return "min"
 
    def getDimensions(self):
       return (self.game.rows, self.game.cols)
