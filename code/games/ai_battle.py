@@ -140,7 +140,7 @@ class AllPlayerBattle:
     def get_game_class(self):
         return self.game_class
 
-    def battle(self):
+    def battle(self, suppress_output=True):
         # Setup
         if self.game is None:
             self.game = self.game_class()
@@ -167,7 +167,8 @@ class AllPlayerBattle:
         if self.use_tqdm:
             self.pbar.close()
 
-        return results
+        if not suppress_output:
+            return results
 
 class MinimaxMonteCarloRandomPlayerBattle(AllPlayerBattle):
     def __init__(self, game_choice,
