@@ -2,6 +2,12 @@ import numpy as np
 import random
 from Games import Game
 
+"""
+
+This file contains information to run a Tic Tac Toe game
+
+"""
+
 def _next_player(player: str) -> str:
     if player == 'max':
         return 'min'

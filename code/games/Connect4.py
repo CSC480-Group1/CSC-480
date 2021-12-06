@@ -77,6 +77,7 @@ class Connect4Impl:
             diagonalsNeg(self.board, self.cols, self.rows)  # negative diagonals
         )
 
+        # Checks for self.win in a rows (usually 4)
         for line in chain(*lines):
             for color, group in groupby(line):
                 if color != NONE and len(list(group)) >= self.win:

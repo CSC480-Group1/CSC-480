@@ -2,6 +2,12 @@ from Games import *
 import random
 import time
 
+"""
+
+Example of usage of `Game`s.
+
+"""
+
 print("Options:")
 print("1. Othello")
 print("2. Checkers")

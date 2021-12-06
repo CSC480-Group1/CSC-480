@@ -2,10 +2,20 @@ import ctypes
 import platform
 from pathlib import Path
 
+"""
+
+This file contains the content that helps load the correct binary for ctypes that contains
+the games written in C++.
+
+The functions in here interact with the binary.
+
+"""
+
 _dir_path = Path(__file__).resolve().parent / "bins"
 
 assert _dir_path.is_dir()
 
+# Decide which binary to use based on operating system and system architecture.
 _boardtest_file = None
 if platform.system() == "Windows":
    if platform.machine() == "AMD64":
@@ -21,6 +31,7 @@ elif platform.system() == "Darwin":
    if platform.machine() == "x86_64":
 	   _boardtest_file = _dir_path / "boardtest-darwin-x86_64.so"
 
+# Raise exception if no binary could be found for system
 if _boardtest_file is None:
    raise Exception("Unsupported platform")
 

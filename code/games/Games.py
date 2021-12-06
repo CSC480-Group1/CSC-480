@@ -6,7 +6,23 @@ import copy
 import io
 
 
+"""
+
+This file contains all the code needed to play a Game.
+
+Games are divided into Python games and CGames. CGames are games
+written in C++ that we use the ctype library to port over to Python.
+This is done within the BoardTest.py file.
+
+"""
+
 class Game(ABC):
+   """
+   Every game must adhere to the interface provided here.
+
+   ONLY ONE GAME AT A TIME MAY BE INITIALIZED. Call close() to be able
+   to make a new Game.
+   """
    _initialized = False
    def __init__(self):
       self.__valid = not Game._initialized
@@ -63,6 +79,7 @@ class Game(ABC):
 
    @staticmethod
    def check_game_valid(func):
+      """ This is a decorator to make sure the game is valid and initialized """
       def validity_fn(self, *args):
          if not self.__valid:
             raise Exception(f'Game {self} has been closed/deleted!')
@@ -70,6 +87,7 @@ class Game(ABC):
       return validity_fn
 
    def close(self):
+      """Deletes the game. Allows new game to be created"""
       if self.__valid:
          self.__valid = False
          Game._initialized = False
@@ -79,6 +97,9 @@ class Game(ABC):
 
 
 class CGame(Game):
+   """
+   Games implemented from BoardTest.py
+   """
    def __init__(self, gamestr):
       super().__init__()
       BoardTest.init(gamestr)
@@ -521,47 +542,6 @@ class Connect4(Game):
       self.printBoard()
 
    @Game.check_game_valid
-   def loadBoard(self, board, board_vals_not_none):
-      self.resetGame()
-      generic_board = self.getBoardCopy()
-      new_history = []
-      b_q, w_q = [], []
-      turn = BLACK
-      board_to_tup = {}
-
-      for i in range(len(board) - 1, -1, -1):
-         row = board[i]
-         for col in range(len(row)):
-            next_item = board[i][col]
-            # print(next_item, end='')
-            if next_item is not NONE:
-               if next_item != turn:
-                  if turn == WHITE:
-                     if len(w_q) != 0:
-                        new_history.append(w_q.pop(0))
-                        turn = WHITE if turn == BLACK else BLACK
-                     b_q.append(col)
-                  else:
-                     if len(b_q) != 0:
-                        new_history.append(b_q.pop(0))
-                        turn = WHITE if turn == BLACK else BLACK
-                     w_q.append(col)
-               else:
-                  new_history.append(col)
-                  turn = WHITE if turn == BLACK else BLACK
-
-      self.loadBoardState(new_history)
-
-      while len(b_q) > 0 or len(w_q) > 0:
-         if turn == WHITE:
-            new_history.append(w_q.pop(0))
-         else:
-            new_history.append(b_q.pop(0))
-         turn = WHITE if turn == BLACK else BLACK
-
-      self.loadBoardState(new_history)
-
-   @Game.check_game_valid
    def undoMoves(self, movesToUndo):
       # Can't go past first board state
       goBackTo = max(1, 1 + len(self.history) - movesToUndo)
@@ -588,7 +568,7 @@ class Connect4(Game):
       curr_turn = self.game.get_turn()
       return BLACK if curr_turn == WHITE else WHITE
 
-
+"""Reimport TicTacToeGame so we can do: from Games import *"""
 try:
    from tictactoe import TicTacToeGame
    TicTacToeGame = TicTacToeGame

@@ -7,6 +7,12 @@ from ai_battle import AIBattle, AllPlayerBattle
 import pickle
 import queue
 
+"""
+
+Same as ai_battle.py stuff but runs bouts in parallel.
+
+"""
+
 try:
     import tqdm
 except ModuleNotFoundError:

@@ -1,6 +1,14 @@
 from Games import Game
 import random
 
+"""
+
+This file contains the code to actually use the minimax algorithm to get the next move.
+
+This file is inspired by Lab 5 in CSC 480 with Professor Rodrigo Canaan.
+
+"""
+
 has_tqdm = True
 try:
     from tqdm import tqdm

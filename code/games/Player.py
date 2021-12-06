@@ -4,6 +4,14 @@ from Games import Game
 import minimax
 import mcts
 
+"""
+
+This file contains the Player definition and its subclasses.
+
+Players need to just implement a `play()` that plays a move given a game.
+
+"""
+
 class Player(ABC):
     @abstractmethod
     def play(self, game: Game):
@@ -60,6 +68,9 @@ class MinimaxPlayer(Player):
         return "{}(eval_func={},depth_limit={})".format(self.__class__.__name__, self._eval_func.__name__, self._depth_limit)
 
 class RandomPlayer(Player):
+    """
+    Player just makes random moves
+    """
     def play(self, game: Game):
         moves = game.getValidMoves()
         assert len(moves) > 0

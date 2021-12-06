@@ -2,6 +2,14 @@ import math
 import random
 from Games import Game
 
+"""
+
+This file contains the code to actually use the MCTS algorithm to get the next move.
+
+This file is inspired by Lab 7 in CSC 480 with Professor Rodrigo Canaan.
+
+"""
+
 has_tqdm = True
 try:
     from tqdm import tqdm

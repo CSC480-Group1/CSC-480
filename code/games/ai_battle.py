@@ -10,6 +10,16 @@ import csv
 
 import sys
 
+"""
+
+This file contains classes to battle AI agents against each other.
+
+Information about how to use these classes can be found in the README.
+
+Demo for usage of this file: https://colab.research.google.com/drive/1qbrKeExzzBb-K7HgdM5KGTJri61nlGLZ?usp=sharing
+
+"""
+
 try:
     from tictactoe import TicTacToeGame
 except ModuleNotFoundError:
@@ -30,6 +40,12 @@ class InvalidGameException(Exception):
         super().__init__(*args)
 
 class AllPlayerBattle:
+    """
+    Class for running match-ups of given players. Each given player plays each other
+    in the given game choice and outputs the results as either a CSV or object.
+
+    Information about how to use this can be found in the README.
+    """
     def __init__(self, game_choice, write_to_csv=True, move_limit=300, play_count=5,
             players=None, use_tqdm=True) -> None:
         if use_tqdm and not has_tqdm:
@@ -141,6 +157,7 @@ class AllPlayerBattle:
         return self.game_class
 
     def battle(self, suppress_output=True):
+        """Actually runs the matchups"""
         # Setup
         if self.game is None:
             self.game = self.game_class()
@@ -171,6 +188,11 @@ class AllPlayerBattle:
             return results
 
 class MinimaxMonteCarloRandomPlayerBattle(AllPlayerBattle):
+    """
+    Class to play a MCTS, Minimax, and RandomPlayer agent all against each other using the AllPlayerBattle.
+
+    Allows you to specify the arguments for MCTS and Minimax players directly.
+    """
     def __init__(self, game_choice,
             minimax_depth=None, minimax_eval_fn=None,
             monte_carlo_c=None, monte_carlo_iters=None,
@@ -198,6 +220,9 @@ class MinimaxMonteCarloRandomPlayerBattle(AllPlayerBattle):
         super().__init__(game_choice, players=[minimax_player, monte_carlo_player, random_player], **kwargs)
 
 class AIBattle:
+    """
+    Class to run a single matchup between 2 players. Call `go()` to run the matchup.
+    """
     def __init__(self, game: Game, p1: Player, p2: Player, update=print, move_limit=300, play_count=5) -> None:
         self.p1 = p1
         self.p2 = p2
@@ -252,6 +277,9 @@ class AIBattle:
         }
 
 class CSVGameWrite:
+    """
+    Class to write the game results to a CSV file.
+    """
     def __init__(self, game_name: str, data_dir='.',
             field_names=['game', 'max', 'min', 'winner', 'max_tottime', 'min_tottime', 'move_count']) -> None:
         self.datafile = Path('{}/data-{}-{}.csv'.format(data_dir, game_name, datetime.datetime.now().strftime('%m_%d-%H_%M')))
@@ -286,6 +314,8 @@ class CSVGameWrite:
 
 
 if __name__ == "__main__":
+    """If exec-ed from the command line, just play a default AllPlayerBattle with
+    MCTS, Minimax, and RandomPlayer with the given game"""
     if len(sys.argv) < 2:
         print("No game specified")
         exit(1)

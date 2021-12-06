@@ -6,7 +6,19 @@ from interactive_agent import InteractiveAgent, InteractiveGameRunner, Interacti
 from minimax import *
 import argparse
 
+"""
+
+This file contains the classes needed to play against a Minimax agent from either the
+object InteractiveMinimaxGame or InteractiveMinimaxGameRunner.
+
+InteractiveMinimaxGameRunner allows running against the minimax agent from the command line.
+
+"""
+
 class InteractiveMinimaxGame(InteractiveAgent):
+    """
+    Plays minimax game with given MinimaxPlayer
+    """
     def __init__(self, game: Game, user_playing_as=None, player: MinimaxPlayer=None) -> None:
         super().__init__(game, user_playing_as, player)
         self.player: MinimaxPlayer = self.player
@@ -15,7 +27,7 @@ class InteractiveMinimaxGame(InteractiveAgent):
     def get_player_type():
         return MinimaxPlayer
 
-    def on_possible_player_move(self, move_number, move):
+    def on_possible_user_move(self, move_number, move):
         self.game.doMove(move)
         val = minimax_val(self.game, self.player.get_eval_func(), float('-inf'), float('inf'), self.player.get_depth_limit())
         self.game.undoMoves(1)
@@ -45,6 +57,7 @@ class InteractiveMinimaxGameRunner(InteractiveGameRunner):
         return 'minimax'
 
     def add_optional_args(self, parser: argparse.ArgumentParser):
+        """Can override depth limit and evaluation function for MinimaxPlayer"""
         parser.add_argument('--depth-limit', '-d', metavar='depth', type=int, required=False, help="Game depth limit")
         parser.add_argument('--eval-fn', '-e', metavar='fn_name', required=False, help="Evaluation function")
 
@@ -61,4 +74,5 @@ class InteractiveMinimaxGameRunner(InteractiveGameRunner):
         return f"eval_fn = {player.get_eval_func()} and depth limit = {player.get_depth_limit()}"
 
 if __name__ == "__main__":
+    """If run from the command line, use command line parser class"""
     InteractiveMinimaxGameRunner().go()

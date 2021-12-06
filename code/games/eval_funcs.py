@@ -6,15 +6,14 @@ from Connect4 import BLACK, WHITE, NONE, diagonalsNeg, diagonalsPos
 from itertools import groupby, chain
 import random
 
-class GameEvalFuncs:
-    def __init__(self, evaluator, remove_depth_from_score=(lambda s, d: s), depth_affected_score=(lambda s, d: s)):
-        self.evaluator = evaluator
-        self.remove_depth_from_score = remove_depth_from_score
-        self.depth_affected_score = depth_affected_score
+"""
 
-    def __call__(self, game: Game) -> float:
-        return self.evaluator(game)
+This file contains all the evaluation functions for Minimax depending on the game.
 
+To see which evaluation functions specifically are used with which games, navigate down
+to the bottom and check out the EvalFnGuide class.
+
+"""
 
 def eval_checkers_1(game: CheckersGame, depth=None) -> int:
     dim = game.getDim()
@@ -187,6 +186,7 @@ def __check_win_connect4(game: Connect4, depth: int):
     return 0
 
 
+# This evaluation function is TERRIBLE
 def eval_connect4_1(game: Connect4, depth=1) -> int:
     return __check_win_connect4(game, depth)
 
@@ -379,6 +379,11 @@ def eval_random_rollout(game: Game) -> int:
     return score
 
 class EvalFnGuide:
+    """
+    This class helps to retrieve the correct evaluation function for a game.
+    """
+
+    # Map of game type to possible evaluation functions
     eval_fns = {
         OthelloGame: [eval_othello_1],
         Connect4: [eval_connect4_1, eval_connect4_2, eval_connect4_3],
@@ -386,10 +391,10 @@ class EvalFnGuide:
         C4Pop10Game: [eval_c4pop10_1],
         CheckersGame: [eval_checkers_1]
     }
-    all_eval_fns = [eval_f for eval_fn_l in eval_fns.values() for eval_f in eval_fn_l]
 
     @staticmethod
     def get_default_fn_for_game(game):
+        """Returns the default evaluation function for a given game. Expects a game type input"""
         if game not in EvalFnGuide.eval_fns:
             raise Exception("Invalid game")
         
@@ -403,6 +408,7 @@ class EvalFnGuide:
 
     @staticmethod
     def get_eval_fn_from_str(game, eval_fn: str):
+        """Takes a eval_fn as a string and parses it into the evaluation function object and checks that it's valid"""
         try:
             relevant_fn = eval(eval_fn)
         except NameError:

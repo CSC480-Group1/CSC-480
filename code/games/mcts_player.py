@@ -10,6 +10,16 @@ try:
 except ModuleNotFoundError:
     TicTacToeGame = None
 
+
+"""
+
+This file contains the classes needed to play against a MCTS agent from either the
+object InteractiveMCTSGame or InteractiveMCTSGameRunner.
+
+InteractiveMCTSGameRunner allows running against the mcts agent from the command line.
+
+"""
+
 class InteractiveMCTSGame(InteractiveAgent):
     def __init__(self, game, user_playing_as=None, player: MonteCarloPlayer=None) -> None:
         super().__init__(game, user_playing_as, player)
@@ -19,7 +29,7 @@ class InteractiveMCTSGame(InteractiveAgent):
     def get_player_type():
         return MonteCarloPlayer
 
-    def on_possible_player_move(self, move_number, move):
+    def on_possible_user_move(self, move_number, move):
         return print("  {}) {}".format(move_number+1, move))
 
     def do_ai_agent_move(self):
@@ -46,6 +56,7 @@ class InteractiveMCTSGameRunner(InteractiveGameRunner):
         return 'mcts'
 
     def add_optional_args(self, parser: argparse.ArgumentParser):
+        """Can override the number of iterations MCTS does and what the exploration parameter is"""
         parser.add_argument('--num-iters', '-n', metavar='iterations', type=int, required=False, help="MCTS iterations")
         parser.add_argument('--c', '-c', metavar='c', required=False, type=float, help="C value")
 
@@ -62,4 +73,5 @@ class InteractiveMCTSGameRunner(InteractiveGameRunner):
         return f"iterations = {player.get_num_iters()} and c = {player.get_c()}"
 
 if __name__ == "__main__":
+    """If run from the command line, use command line parser class"""
     InteractiveMCTSGameRunner().go()
