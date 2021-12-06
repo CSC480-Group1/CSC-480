@@ -4,22 +4,6 @@
 
 For this, we will assume we have a basic working Connect X implementation, which can have a variable number rows/columns and win condition. If you want to see the implementation, check the `Show all code` checkbox at the top.
 
-
-```python
-!pip install tqdm
-```
-
-    Requirement already satisfied: tqdm in c:\programdata\anaconda3\lib\site-packages (4.62.3)
-    Requirement already satisfied: colorama; platform_system == "Windows" in c:\programdata\anaconda3\lib\site-packages (from tqdm) (0.3.9)
-
-
-    WARNING: pip is being invoked by an old script wrapper. This will fail in a future version of pip.
-    Please see https://github.com/pypa/pip/issues/5599 for advice on fixing the underlying issue.
-    To avoid this problem you can invoke Python with '-m pip' instead of running pip directly.
-    WARNING: You are using pip version 20.0.2; however, version 21.3.1 is available.
-    You should consider upgrading via the 'C:\ProgramData\Anaconda3\python.exe -m pip install --upgrade pip' command.
-
-
 ## Playing the game.
 
 ### Starting a game
@@ -135,9 +119,12 @@ def mcts(game, player: str, iterations: int, quiet=False, c=1):
     if not quiet and has_tqdm:
         iter = tqdm.tqdm(iter, desc='Calculating Monte-Carlo')
     for _ in iter:
+        # Tree policy
         node = _tree_policy(lookahead, start_node, c)
+        # Default policy
         value = _default_policy(lookahead)
         lookahead.undoMoves(lookahead.depth)
+        # Back Propagation
         _backup(node, value)
         assert key == game.getBoardKey()
     action = _best_child(start_node, 0).move
@@ -151,6 +138,7 @@ def _next_player(player):
     else:
         raise ValueError('Unknown player "{}"'.format(player))
 
+# Used to run the actual Connect X game moves and undo them
 class _Game_Lookahead:
     def __init__(self, game, depth = 0):
         self.game = game
@@ -164,6 +152,7 @@ class _Game_Lookahead:
         self.depth = max(0, self.depth - moveCount)
         self.game.undoMoves(moveCount)
 
+# Node represents everything we need to know about how well a move performed and allows us to move in the tree
 class _MCTS_Node:
     def __init__(self, move, depth, parent, player):
         self.min_wins = 0
@@ -175,6 +164,7 @@ class _MCTS_Node:
         self.player = player
         self.depth = depth
     
+    # Adds a new child node to node to represent a move from this node. Each child is a different move
     def add_child(self, move):
         if move in self.children:
             raise ValueError('Child already exists')
@@ -196,13 +186,15 @@ class _MCTS_Node:
         if self.count == 0:
             raise ValueError("Must be updated at least once to get expected value")
         return (self.max_wins - self.min_wins) / self.count
-
+    
+    # Gets exploration term
     def _get_explore_term(self, parent, c=1):
         if parent is not None:
             return c * math.sqrt(2 * math.log(parent.count) / self.count)
         else:
             return 0
-
+    
+    # Gets the upper confidence bound (how good we think this node is). Some nodes might have more wins than others
     def get_ucb(self, c):
         if self.count == 0:
             raise ValueError("Must be updated at least once to calculate UCB")
@@ -212,6 +204,7 @@ class _MCTS_Node:
         explore_term = self._get_explore_term(self.parent, c)
         return p_win + explore_term
     
+# Expands a node... adds one more child to tree
 def _expand(game: _Game_Lookahead, node):
     # Make sure the game state is at the current node
     assert game.depth == node.depth
@@ -225,26 +218,32 @@ def _expand(game: _Game_Lookahead, node):
     
     return None
 
-
+# Calculates the best child to pick from the node
 def _best_child(node, c):
     return max(node.children.values(), key=lambda child: child.get_ucb(c))
 
 
+# Does tree policy
 def _tree_policy(game: _Game_Lookahead, node, c):
     assert game.depth == node.depth
-
+    
+    # Check if terminal state
     if game.game.getWinner() is not None:
         return node
     
+    # Expand node if possible (add new child)
     unexplored_child = _expand(game, node)
     if unexplored_child is not None:
+        # Selection is new child
         game.doMove(unexplored_child.move)
         return unexplored_child
     else:
+        # Selection is the node's best child
         next = _best_child(node, c)
         game.doMove(next.move)
         return _tree_policy(game, next, c)
 
+# Peform back propagation up to root
 def _backup(node, winner):
     if node is None:
         return
@@ -255,7 +254,9 @@ def _backup(node, winner):
         node.max_wins += 1
     _backup(node.parent, winner)
 
+# Run default policy (random rollouts)
 def _default_policy(game: _Game_Lookahead):
+    # Helper to convert winner to proper names for MCTS
     def w_helper():
         temp_winner = game.game.getWinner()
         if temp_winner != BLACK and temp_winner != WHITE:
@@ -264,6 +265,7 @@ def _default_policy(game: _Game_Lookahead):
     
     winner = w_helper()
     
+    # Keep going until we hit a terminal state
     while winner is None:
         game.doMove(random.choice(game.game.getValidMoves()))
         winner = w_helper()
@@ -306,7 +308,7 @@ run_mcts_game([0, 1, 2, 0, 2, 1, 1, 1])
     
 
 
-    Calculating Monte-Carlo: 100%|█████████████████████████████████████████████████████| 250/250 [00:00<00:00, 6250.27it/s]
+    Calculating Monte-Carlo: 100%|█████████████████████████████████████████████████████| 250/250 [00:00<00:00, 6555.61it/s]
 
     BLACK played 2
     
@@ -339,17 +341,13 @@ run_mcts_game([0, 1])
     BLACK played 1
     WHITE played 0
     BLACK played 1
-    WHITE played 1
-    BLACK played 0
     WHITE played 2
-    BLACK played 0
-    WHITE played 2
-    BLACK played 2
+    BLACK played 1
     
        0  1  2
-    0  B  W  .
-    1  B  B  B
-    2  W  B  W
+    0  .  B  .
+    1  .  B  .
+    2  W  B  .
     3  B  W  W
     
     Winner: BLACK
@@ -370,36 +368,30 @@ run_mcts_game([], rows = 6, cols = 7, requiredToWin=4, iters=50)
     
     BLACK played 1
     WHITE played 4
-    BLACK played 4
+    BLACK played 3
+    WHITE played 3
+    BLACK played 0
     WHITE played 2
-    BLACK played 3
+    BLACK played 0
     WHITE played 0
-    BLACK played 3
-    WHITE played 1
+    BLACK played 6
+    WHITE played 4
+    BLACK played 2
+    WHITE played 5
     BLACK played 6
     WHITE played 3
     BLACK played 3
-    WHITE played 6
-    BLACK played 3
-    WHITE played 1
-    BLACK played 4
-    WHITE played 1
-    BLACK played 1
-    WHITE played 1
-    BLACK played 6
-    WHITE played 0
-    BLACK played 2
-    WHITE played 0
-    BLACK played 6
-    WHITE played 0
+    WHITE played 2
+    BLACK played 0
+    WHITE played 2
     
        0  1  2  3  4  5  6
-    0  .  W  .  .  .  .  .
-    1  .  B  .  B  .  .  .
-    2  W  W  .  B  .  .  B
-    3  W  W  .  W  B  .  B
-    4  W  W  B  B  B  .  W
-    5  W  B  W  B  W  .  B
+    0  .  .  .  .  .  .  .
+    1  .  .  .  .  .  .  .
+    2  B  .  W  B  .  .  .
+    3  W  .  W  W  .  .  .
+    4  B  .  B  W  W  .  B
+    5  B  B  W  B  W  W  B
     
     Winner: WHITE
 
@@ -417,29 +409,56 @@ run_mcts_game([], rows = 6, cols = 7, requiredToWin=4, iters=150)
     4  .  .  .  .  .  .  .
     5  .  .  .  .  .  .  .
     
-    BLACK played 3
-    WHITE played 4
-    BLACK played 3
-    WHITE played 3
-    BLACK played 0
-    WHITE played 2
-    BLACK played 3
-    WHITE played 1
-    BLACK played 2
+    BLACK played 5
     WHITE played 4
     BLACK played 1
-    WHITE played 2
+    WHITE played 1
+    BLACK played 1
+    WHITE played 3
+    BLACK played 4
+    WHITE played 3
+    BLACK played 4
+    WHITE played 0
+    BLACK played 1
+    WHITE played 0
+    BLACK played 4
+    WHITE played 4
     BLACK played 0
+    WHITE played 3
+    BLACK played 3
+    WHITE played 1
+    BLACK played 0
+    WHITE played 1
+    BLACK played 6
+    WHITE played 5
+    BLACK played 0
+    WHITE played 0
+    BLACK played 4
+    WHITE played 5
+    BLACK played 5
+    WHITE played 3
+    BLACK played 3
+    WHITE played 5
+    BLACK played 5
+    WHITE played 2
+    BLACK played 2
+    WHITE played 6
+    BLACK played 6
+    WHITE played 6
+    BLACK played 6
+    WHITE played 6
+    BLACK played 2
+    WHITE played 2
     
        0  1  2  3  4  5  6
-    0  .  .  .  .  .  .  .
-    1  .  .  .  .  .  .  .
-    2  .  .  .  B  .  .  .
-    3  .  .  W  W  .  .  .
-    4  B  B  B  B  W  .  .
-    5  B  W  W  B  W  .  .
+    0  W  W  .  B  B  B  W
+    1  B  W  .  W  W  W  B
+    2  B  B  W  B  B  B  W
+    3  B  B  B  W  B  W  B
+    4  W  W  B  W  B  W  W
+    5  W  B  W  W  W  B  B
     
-    Winner: BLACK
+    Winner: WHITE
 
 
 
@@ -455,33 +474,28 @@ run_mcts_game([], rows = 6, cols = 7, requiredToWin=4, iters=50, c=3)
     4  .  .  .  .  .  .  .
     5  .  .  .  .  .  .  .
     
-    BLACK played 2
-    WHITE played 2
-    BLACK played 0
-    WHITE played 1
-    BLACK played 2
-    WHITE played 2
-    BLACK played 1
-    WHITE played 3
-    BLACK played 0
-    WHITE played 3
-    BLACK played 1
-    WHITE played 6
-    BLACK played 1
-    WHITE played 1
     BLACK played 3
-    WHITE played 3
+    WHITE played 1
+    BLACK played 2
+    WHITE played 2
+    BLACK played 5
+    WHITE played 4
+    BLACK played 2
+    WHITE played 4
     BLACK played 0
+    WHITE played 5
+    BLACK played 0
+    WHITE played 3
     
        0  1  2  3  4  5  6
     0  .  .  .  .  .  .  .
-    1  .  W  .  .  .  .  .
-    2  .  B  W  W  .  .  .
-    3  B  B  B  B  .  .  .
-    4  B  B  W  W  .  .  .
-    5  B  W  B  W  .  .  W
+    1  .  .  .  .  .  .  .
+    2  .  .  .  .  .  .  .
+    3  .  .  B  .  .  .  .
+    4  B  .  W  W  W  W  .
+    5  B  W  B  B  W  B  .
     
-    Winner: BLACK
+    Winner: WHITE
 
 
 Changing `c` and `iters` changes how MCTS will play. The more iterations, the more likely MCTS will perform better.
