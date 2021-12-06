@@ -1,40 +1,36 @@
 import { Player } from "./ConnectX";
-import { BLACK, BLACK_PLAYER, ConnectXImpl, WHITE, WHITE_PLAYER } from "./ConnectXImpl";
-
-const transpositionTable = new Map<string, number>();
-
-const ttGet = (board: Array<Array<string>>, depth?: number): number | undefined => {
-  return transpositionTable.get(board.toString());
-};
-
-const ttPut = (board: Array<Array<string>>, score: number, depth?: number): void => {
-  transpositionTable.set(board.toString(), score);
-};
+import {
+  BLACK,
+  BLACK_PLAYER,
+  ConnectXImpl,
+  NONE,
+  WHITE,
+  WHITE_PLAYER,
+} from "./ConnectXImpl";
 
 export class MinimaxPlayer implements Player {
   disableMove = true;
   automated = true;
   inDecision = false;
 
-  minimax(game: ConnectXImpl, alpha: number, beta: number, depth=0): number {
+  minimax(
+    game: ConnectXImpl,
+    alpha: number,
+    beta: number,
+    depthLimit = 0
+  ): number {
     const currentPlayer = game.getWhoseMove();
     const validMoves = game.getValidMoves();
 
-    const tempScore = ttGet(game.board);
-    if (tempScore) {
-      return tempScore;
-    }
-
-    if (validMoves.length === 0) {
-      const utilityScore = this.connectXUtility(game, depth);
-      ttPut(game.board, utilityScore);
+    if (validMoves.length === 0 || depthLimit === 0) {
+      const utilityScore = this.eval_connect4_2(game);
       return utilityScore;
     }
 
     let bestScore = currentPlayer == BLACK_PLAYER ? -Infinity : Infinity;
     for (const successiveMove of validMoves) {
       game.insert(successiveMove);
-      const moveScore = this.minimax(game, alpha, beta, depth + 1);
+      const moveScore = this.minimax(game, alpha, beta, depthLimit - 1);
       game.undoLastMove();
 
       if (currentPlayer === BLACK_PLAYER) {
@@ -55,6 +51,37 @@ export class MinimaxPlayer implements Player {
     return bestScore;
   }
 
+  // https://www.scirp.org/html/1-9601415_90972.htm#f12
+  // https://github.dev/Qtrain/Java/blob/master/src/unfinishedProjects/connectfour/Board.java
+  evaluationTable = [
+    [3, 4, 5, 7, 5, 4, 3],
+    [4, 6, 8, 10, 8, 6, 4],
+    [5, 8, 11, 13, 11, 8, 5],
+    [5, 8, 11, 13, 11, 8, 5],
+    [4, 6, 8, 10, 8, 6, 4],
+    [3, 4, 5, 7, 5, 4, 3],
+  ];
+  eval_connect4_2(game: ConnectXImpl): number {
+    const utility = 138;
+    if (game.getWinner() !== NONE) {
+      return game.getWhoseMove() == BLACK_PLAYER ? utility * 2 : -(utility * 2);
+    } else if (game.getValidMoves().length === 0) {
+      return utility;
+    }
+
+    const max_rows = game.board[0].length;
+    const max_cols = game.board.length;
+    const board = game.board;
+    let sum = 0;
+    for (let i = 0; i < max_cols; i++) {
+      for (let j = 0; j < max_rows; j++) {
+        if (board[i][j] == BLACK) sum += this.evaluationTable[j][i];
+        else if (board[i][j] != NONE) sum -= this.evaluationTable[j][i];
+      }
+    }
+    return utility + sum;
+  }
+
   connectXUtility(game: ConnectXImpl, depth: number): number {
     let score;
     const winner = game.checkForWin();
@@ -68,6 +95,8 @@ export class MinimaxPlayer implements Player {
 
     return score * (1 / (1 + depth));
   }
+
+  DEPTH_LIMIT = 4;
 
   onMoveReady(_: number, game: ConnectXImpl): number {
     const currentPlayer = game.getWhoseMove();
@@ -83,7 +112,12 @@ export class MinimaxPlayer implements Player {
 
     for (const move of validMoves) {
       game.insert(move);
-      let minimaxScore = this.minimax(game, -Infinity, Infinity);
+      let minimaxScore = this.minimax(
+        game,
+        -Infinity,
+        Infinity,
+        this.DEPTH_LIMIT
+      );
       game.undoLastMove();
 
       minimaxScore = Math.round(minimaxScore * 100000);

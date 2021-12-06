@@ -164,8 +164,6 @@ export function ConnectX(props: ConnectXProps) {
     setUpdate(!update);
   };
 
-  console.log("D IS", d);
-
   const setPlayerToSomething = (isManual: boolean, whichPlayer: number): void => {
     const newPlayerArr = [...players];
     const newPlayer = isManual ? setupManualPlayer() : new MinimaxPlayer();
@@ -202,8 +200,6 @@ export function ConnectX(props: ConnectXProps) {
 
   if (currPlayer.automated && connectXGame.checkForWin() === NONE && connectXGame.getValidMoves().length > 0 && !inDecision) {
     sd(d + 1);
-    console.log("INSIDE THIS LOOP!");
-    console.log(connectXGame.copy().board);
     const nextMove = players[whichPlayer].onMoveReady(-1, connectXGame.copy());
     onMoveMade(nextMove);
   }

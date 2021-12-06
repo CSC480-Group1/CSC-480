@@ -1,6 +1,7 @@
 import { AppBar, Link, Toolbar } from "@material-ui/core";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import React from "react";
+import { SafeAnchor } from "react-bootstrap";
 import {Link as RouterLink} from "react-router-dom";
 import { ConnectX } from "../connectx/ConnectX";
 
@@ -35,6 +36,9 @@ export default function ButtonAppBar() {
           <Link className={classes.links} to="/" component={RouterLink}>
             Home
           </Link>
+          <a style={{ textDecoration: "none" }} className={classes.links} href="https://colab.research.google.com/drive/1jpOXGfceP3olYiqQk5LOXA_2q2k3LzQ5?usp=sharing">
+            Colab Notebook Demo
+          </a>
           <Link className={classes.links} to="/connectx-demo" component={RouterLink}>
             Connect X
           </Link>

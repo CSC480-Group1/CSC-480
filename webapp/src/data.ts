@@ -18,5 +18,25 @@ export const tutorials = [
       ]
     },
     notebook: "minimax_algorithm"
-  }
+  },
+  // MCTS
+  {
+    img: {
+      url: "https://miro.medium.com/max/1000/1*OpJz2LcElVB_XPEYAvK87Q.jpeg",
+      title: "MCTS Algorithm Image"
+    },
+    content: {
+      title: "Monte Carlo Tree Search with Connect X",
+      description:
+        "We will implement the Monte Carlo Tree Search (MCTS) algorithm from scratch and test it on Connect X (modification of Connect 4).",
+      dataset: "",
+      questions: [
+        {
+          question: "What's the tradeoff of using a high number of iterations? Why not make it a very large number?",
+          answer: "The higher the number of iterations, the paths that MCTS will create, which takes more time. We need to have a happy medium of time it takes to complete the guess for the best move and how good that guess is."
+        }
+      ]
+    },
+    notebook: "mcts_tutorial"
+  },
 ];

@@ -10,6 +10,12 @@
 
 <hr>
 
+## Demo
+
+For a demo of the project (as a Colab Notebook), please visit [here](https://colab.research.google.com/drive/1jpOXGfceP3olYiqQk5LOXA_2q2k3LzQ5?usp=sharing).
+
+You can also check out some tutorials of Monte Carlo Tree Search (MCTS) and Minimax on our [website](https://csc480-group1.github.io/CSC-480/#/).
+
 ## Running files
 ### Setup
 On Cal Poly Unix servers:

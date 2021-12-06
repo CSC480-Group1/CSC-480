@@ -62,8 +62,8 @@ export default function Home() {
       <CTACard
         title="Not sure where to start?"
         description="Learn how to use the website"
-        buttonText="Get Started"
-        linkTo="/getting-started"/>
+        buttonText="Purpose"
+        linkTo="/purpose"/>
 
       <Gallery cards={tutorials}/>
     </>

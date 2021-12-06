@@ -31,7 +31,7 @@ export class ConnectXImpl {
   turn: string;
   moveHistory: Array<number>;
 
-  constructor(cols = 4, rows = 4, requiredToWin = 3) {
+  constructor(cols = 7, rows = 6, requiredToWin = 4) {
     this.cols = cols;
     this.rows = rows;
     this.win = requiredToWin;
