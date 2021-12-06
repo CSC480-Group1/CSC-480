@@ -245,7 +245,8 @@ def run_minimax_game(move_history, requiredToWin=3, cols=3, rows=4):
         runs += 1
         if runs > 4:
             raise Exception('Too many runs')
-
+    
+    print()
     game.printBoard()
     print('Winner:', game.getWinningPlayer())
 ```
@@ -264,6 +265,7 @@ run_minimax_game([0, 1, 2, 0, 2, 1, 1, 1])
     BLACK played 0
     WHITE played 0
     BLACK played 2
+    
        0  1  2
     0  W  W  .
     1  B  B  B
@@ -343,6 +345,7 @@ run_minimax_game([0, 1, 2, 0, 2, 1, 1, 1])
     3  B  W  B
     
     BLACK played 2
+    
        0  1  2
     0  .  W  .
     1  .  B  B
@@ -389,6 +392,7 @@ run_minimax_game([0, 1, 2, 0, 1], rows=3, cols=3)
     BLACK played 1
     WHITE played 2
     BLACK played 2
+    
        0  1  2
     0  W  B  B
     1  W  B  W
@@ -414,6 +418,7 @@ run_minimax_game([0, 1, 2, 2, 1], rows=3, cols=3)
     BLACK played 1
     WHITE played 0
     BLACK played 0
+    
        0  1  2
     0  B  B  W
     1  W  B  W
@@ -447,7 +452,6 @@ game.printBoard()
 print('Winner:', game.checkForWin())
 ```
 
-    [['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.']]
     Winner at start: None
     Game board at start:
        0  1  2  3  4  5  6
@@ -458,71 +462,6 @@ print('Winner:', game.checkForWin())
     4  .  .  .  .  .  .  .
     5  .  .  .  .  .  .  .
     
-    [['.', '.', '.', '.', '.', 'B'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.']]
-    [['.', '.', '.', '.', 'W', 'B'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.']]
-    [['.', '.', '.', '.', 'W', 'B'], ['.', '.', '.', '.', '.', 'B'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.']]
-    [['.', '.', '.', '.', 'W', 'B'], ['.', '.', '.', '.', 'W', 'B'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.']]
-    [['.', '.', '.', '.', 'W', 'B'], ['.', '.', '.', '.', 'W', 'B'], ['.', '.', '.', '.', '.', 'B'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.']]
-    [['.', '.', '.', '.', 'W', 'B'], ['.', '.', '.', '.', 'W', 'B'], ['.', '.', '.', '.', 'W', 'B'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.']]
-    [['.', '.', '.', '.', 'W', 'B'], ['.', '.', '.', '.', 'W', 'B'], ['.', '.', '.', '.', 'W', 'B'], ['.', '.', '.', '.', '.', 'B'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.']]
-    . <itertools._grouper object at 0x000001E53A2A9F28> ['.', '.', '.', '.']
-    W <itertools._grouper object at 0x000001E53A2A9D30> ['W']
-    B <itertools._grouper object at 0x000001E53A2A9358> ['B']
-    . <itertools._grouper object at 0x000001E53A2A9B70> ['.', '.', '.', '.']
-    W <itertools._grouper object at 0x000001E53A2A9358> ['W']
-    B <itertools._grouper object at 0x000001E53A2A99B0> ['B']
-    . <itertools._grouper object at 0x000001E53A2A9198> ['.', '.', '.', '.']
-    W <itertools._grouper object at 0x000001E53A2A99B0> ['W']
-    B <itertools._grouper object at 0x000001E53A2A9780> ['B']
-    . <itertools._grouper object at 0x000001E53A2A9BE0> ['.', '.', '.', '.', '.']
-    B <itertools._grouper object at 0x000001E53A2A9780> ['B']
-    . <itertools._grouper object at 0x000001E53A2A9080> ['.', '.', '.', '.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2A94E0> ['.', '.', '.', '.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2A9208> ['.', '.', '.', '.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2A94E0> ['.', '.', '.', '.', '.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2A9080> ['.', '.', '.', '.', '.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2A9A90> ['.', '.', '.', '.', '.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2A9208> ['.', '.', '.', '.', '.', '.', '.']
-    W <itertools._grouper object at 0x000001E53A2A94E0> ['W', 'W', 'W']
-    . <itertools._grouper object at 0x000001E53A2A9208> ['.', '.', '.', '.']
-    B <itertools._grouper object at 0x000001E53A2A9080> ['B', 'B', 'B', 'B']
-    . <itertools._grouper object at 0x000001E53A2A9208> ['.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2A9A90> ['.']
-    . <itertools._grouper object at 0x000001E53A2A9780> ['.', '.']
-    . <itertools._grouper object at 0x000001E53A2A9A90> ['.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2A94E0> ['.', '.', '.', '.']
-    W <itertools._grouper object at 0x000001E53A2A9080> ['W']
-    . <itertools._grouper object at 0x000001E53A2A9780> ['.', '.', '.', '.']
-    B <itertools._grouper object at 0x000001E53A2A9C18> ['B']
-    W <itertools._grouper object at 0x000001E53A2A9A90> ['W']
-    . <itertools._grouper object at 0x000001E53A2A9748> ['.', '.', '.', '.']
-    B <itertools._grouper object at 0x000001E53A2A93C8> ['B']
-    W <itertools._grouper object at 0x000001E53A2A9080> ['W']
-    . <itertools._grouper object at 0x000001E53A2BAD68> ['.', '.', '.', '.']
-    B <itertools._grouper object at 0x000001E53A2BA438> ['B']
-    . <itertools._grouper object at 0x000001E53A2A9E80> ['.', '.', '.', '.']
-    B <itertools._grouper object at 0x000001E53A2BA438> ['B']
-    . <itertools._grouper object at 0x000001E53A2A9080> ['.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2BAD68> ['.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2A9A90> ['.', '.']
-    . <itertools._grouper object at 0x000001E53A2BAD68> ['.']
-    . <itertools._grouper object at 0x000001E53A2BA3C8> ['.']
-    . <itertools._grouper object at 0x000001E53A2BA710> ['.', '.']
-    . <itertools._grouper object at 0x000001E53A2BA3C8> ['.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2BA438> ['.', '.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2BA3C8> ['.', '.', '.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2BA710> ['.', '.', '.', '.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2BA3C8> ['.', '.', '.', '.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2BA438> ['.', '.', '.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2BA3C8> ['.', '.']
-    W <itertools._grouper object at 0x000001E53A2BA710> ['W']
-    B <itertools._grouper object at 0x000001E53A2BA438> ['B']
-    . <itertools._grouper object at 0x000001E53A2BA400> ['.']
-    W <itertools._grouper object at 0x000001E53A2BA438> ['W']
-    B <itertools._grouper object at 0x000001E53A2BA390> ['B']
-    W <itertools._grouper object at 0x000001E53A2BA0F0> ['W']
-    B <itertools._grouper object at 0x000001E53A2BA0B8> ['B']
-    B <itertools._grouper object at 0x000001E53A2BA668> ['B']
     Game board after all moves:
        0  1  2  3  4  5  6
     0  .  .  .  .  .  .  .
@@ -532,64 +471,5 @@ print('Winner:', game.checkForWin())
     4  W  W  W  .  .  .  .
     5  B  B  B  B  .  .  .
     
-    [['.', '.', '.', '.', 'W', 'B'], ['.', '.', '.', '.', 'W', 'B'], ['.', '.', '.', '.', 'W', 'B'], ['.', '.', '.', '.', '.', 'B'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.'], ['.', '.', '.', '.', '.', '.']]
-    . <itertools._grouper object at 0x000001E53A2BADA0> ['.', '.', '.', '.']
-    W <itertools._grouper object at 0x000001E53A2BA9E8> ['W']
-    B <itertools._grouper object at 0x000001E53A2BA9B0> ['B']
-    . <itertools._grouper object at 0x000001E53A2BADD8> ['.', '.', '.', '.']
-    W <itertools._grouper object at 0x000001E53A2BA9B0> ['W']
-    B <itertools._grouper object at 0x000001E53A2BA5F8> ['B']
-    . <itertools._grouper object at 0x000001E53A2BA470> ['.', '.', '.', '.']
-    W <itertools._grouper object at 0x000001E53A2BA5F8> ['W']
-    B <itertools._grouper object at 0x000001E53A2BA320> ['B']
-    . <itertools._grouper object at 0x000001E53A2BA5C0> ['.', '.', '.', '.', '.']
-    B <itertools._grouper object at 0x000001E53A2BA320> ['B']
-    . <itertools._grouper object at 0x000001E53A2BA748> ['.', '.', '.', '.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2BA6D8> ['.', '.', '.', '.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2BA6A0> ['.', '.', '.', '.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2BA6D8> ['.', '.', '.', '.', '.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2BA748> ['.', '.', '.', '.', '.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2BA358> ['.', '.', '.', '.', '.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2BA6A0> ['.', '.', '.', '.', '.', '.', '.']
-    W <itertools._grouper object at 0x000001E53A2BA6D8> ['W', 'W', 'W']
-    . <itertools._grouper object at 0x000001E53A2BA6A0> ['.', '.', '.', '.']
-    B <itertools._grouper object at 0x000001E53A2BA748> ['B', 'B', 'B', 'B']
-    . <itertools._grouper object at 0x000001E53A2BA6A0> ['.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2BA358> ['.']
-    . <itertools._grouper object at 0x000001E53A2BA320> ['.', '.']
-    . <itertools._grouper object at 0x000001E53A2BA358> ['.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2BA6D8> ['.', '.', '.', '.']
-    W <itertools._grouper object at 0x000001E53A2BA748> ['W']
-    . <itertools._grouper object at 0x000001E53A2BA320> ['.', '.', '.', '.']
-    B <itertools._grouper object at 0x000001E53A2BA4A8> ['B']
-    W <itertools._grouper object at 0x000001E53A2BA358> ['W']
-    . <itertools._grouper object at 0x000001E53A2BA048> ['.', '.', '.', '.']
-    B <itertools._grouper object at 0x000001E53A2BA208> ['B']
-    W <itertools._grouper object at 0x000001E53A2BA748> ['W']
-    . <itertools._grouper object at 0x000001E53A2BA128> ['.', '.', '.', '.']
-    B <itertools._grouper object at 0x000001E53A2BA780> ['B']
-    . <itertools._grouper object at 0x000001E53A2BA358> ['.', '.', '.', '.']
-    B <itertools._grouper object at 0x000001E53A2BA240> ['B']
-    . <itertools._grouper object at 0x000001E53A2BA748> ['.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2BAC88> ['.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2BA780> ['.', '.']
-    . <itertools._grouper object at 0x000001E53A2BAC88> ['.']
-    . <itertools._grouper object at 0x000001E53A2BAF98> ['.']
-    . <itertools._grouper object at 0x000001E53A2BA080> ['.', '.']
-    . <itertools._grouper object at 0x000001E53A2BAF98> ['.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2BA240> ['.', '.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2BA748> ['.', '.', '.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2BA080> ['.', '.', '.', '.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2BAF98> ['.', '.', '.', '.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2BA240> ['.', '.', '.', '.', '.']
-    . <itertools._grouper object at 0x000001E53A2BA748> ['.', '.']
-    W <itertools._grouper object at 0x000001E53A2BA080> ['W']
-    B <itertools._grouper object at 0x000001E53A2BA240> ['B']
-    . <itertools._grouper object at 0x000001E53A2BA828> ['.']
-    W <itertools._grouper object at 0x000001E53A2BAF98> ['W']
-    B <itertools._grouper object at 0x000001E53A2BA518> ['B']
-    W <itertools._grouper object at 0x000001E53A2BA198> ['W']
-    B <itertools._grouper object at 0x000001E53A2BA7B8> ['B']
-    B <itertools._grouper object at 0x000001E53A2BA588> ['B']
-    Winner: None
+    Winner: B
 
