@@ -10,11 +10,13 @@
 
 <hr>
 
-## Demo
+## Demos
 
 For a demo of the project (as a Colab Notebook), please visit [here](https://colab.research.google.com/drive/1jpOXGfceP3olYiqQk5LOXA_2q2k3LzQ5?usp=sharing).
 
 You can also check out some tutorials of Monte Carlo Tree Search (MCTS) and Minimax on our [website](https://csc480-group1.github.io/CSC-480/#/).
+
+To view the results of all our data collection, go to the [All Data Collected section](#all-data-collected).
 
 ## Running files
 ### Setup
@@ -128,6 +130,10 @@ Here are some sample rows:
 ### More Advanced Usage
 
 For more advanced usage of the this, please view [this Colab notebook](https://colab.research.google.com/drive/1qbrKeExzzBb-K7HgdM5KGTJri61nlGLZ?usp=sharing).
+
+### All Data Collected
+
+All the data we collected from running our games and different algorithms can be found [here](https://drive.google.com/drive/folders/1L1ZGN98CCbHYlFoIN9mHgqoiJm-RBB4u?usp=sharing).
 
 <hr>
 
