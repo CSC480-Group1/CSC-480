@@ -21,7 +21,7 @@ To view the results of all our data collection, go to the [All Data Collected se
 ## Running files
 ### Setup
 On Cal Poly Unix servers:
-   1. `ssh \<username\>@unix<1-5>.csc.calpoly.edu`
+   1. `ssh <username>@unix<1-5>.csc.calpoly.edu`
       - If you are off campus, you need to first connect to the VPN through GlobalProtect. Info can be found [here](https://calpoly.atlassian.net/wiki/spaces/CPKB/pages/2425047/Set+up+VPN)
    1. `git clone https://github.com/CSC480-Group1/CSC-480.git`
    1. **OPTIONAL**: make a python virtual environment at this point and activate it
