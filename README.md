@@ -50,10 +50,10 @@ Game options:
 ### Selecting who you want to play as
 - You will be prompted who you want to play as. This will look like:
 ```
-Play as black or white? (n for no player)
-(b/w/n)> 
+Play as max or min? (n for no player)
+(max/min/n)>
 ``` 
-> Enter `b` for playing as black and making the 1st move, `w` for playing white and making the 2nd move, and `n` for having 2 agents play each other (you don't participate)
+> Enter `max` for playing as the player who will make the 1st move, `min` for playing as the player who will make the 2nd move, and `n` for having 2 agents play each other (you don't participate)
 
 ### Minimax Option
 1. `python3 minimax_player.py`
